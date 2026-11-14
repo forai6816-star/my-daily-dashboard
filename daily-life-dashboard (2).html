@@ -1,0 +1,2458 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة يومي — إدارة الروتين والمهام</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   لوحة يومي — Daily Life Dashboard
+   نظام تصميم Minimal — Dark افتراضي + Light — RTL عربي كامل
+   ============================================================ */
+:root{
+  --bg:#0e1317; --bg2:#11181d; --card:#151c22; --card2:#1a232b;
+  --border:#243039; --border2:#2e3c46;
+  --text:#e7eef4; --muted:#8fa0ad; --faint:#5f707d;
+  --accent:#2dd4bf; --accent-deep:#14b8a6; --accent-soft:rgba(45,212,191,.12);
+  --gold:#e6c375; --gold-soft:rgba(230,195,117,.12);
+  --ok:#34d399; --ok-soft:rgba(52,211,153,.12);
+  --warn:#f5b64c; --warn-soft:rgba(245,182,76,.13);
+  --bad:#f4737a; --bad-soft:rgba(244,115,122,.12);
+  --info:#6ea8fe; --info-soft:rgba(110,168,254,.12);
+  --radius:14px; --radius-sm:9px;
+  --shadow:0 4px 18px rgba(0,0,0,.22);
+  --font:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;
+}
+[data-theme="light"]{
+  --bg:#f2f5f7; --bg2:#eaeff2; --card:#ffffff; --card2:#f6f9fa;
+  --border:#dfe7ed; --border2:#c9d6df;
+  --text:#1b2833; --muted:#5d7080; --faint:#8ba0af;
+  --accent:#0e9c8d; --accent-deep:#0b7f73; --accent-soft:rgba(14,156,141,.10);
+  --gold:#b8892f; --gold-soft:rgba(184,137,47,.10);
+  --ok:#149a63; --ok-soft:rgba(20,154,99,.10);
+  --warn:#b97a10; --warn-soft:rgba(185,122,16,.11);
+  --bad:#d43f4b; --bad-soft:rgba(212,63,75,.09);
+  --info:#2563c9; --info-soft:rgba(37,99,201,.09);
+  --shadow:0 3px 14px rgba(30,50,70,.08);
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html{font-size:15px}
+body{
+  font-family:var(--font); background:var(--bg); color:var(--text);
+  min-height:100vh; transition:background .25s,color .25s;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit; cursor:pointer; border:none; background:none; color:inherit}
+input,select,textarea{font-family:inherit; font-size:.95rem; color:var(--text);
+  background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:.55rem .75rem; outline:none; transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+input[type="time"],input[type="date"],input[type="number"]{direction:ltr; text-align:center}
+textarea{resize:vertical; width:100%; line-height:1.7}
+::placeholder{color:var(--faint)}
+a{color:var(--accent); text-decoration:none}
+
+/* ---------- الهيكل العام ---------- */
+.wrap{max-width:1120px; margin:0 auto; padding:0 16px 60px}
+.topbar{
+  position:sticky; top:0; z-index:50; background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(10px); border-bottom:1px solid var(--border);
+}
+.topbar-in{max-width:1120px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; gap:12px}
+.brand{display:flex; align-items:center; gap:9px; font-weight:800; font-size:1.12rem; white-space:nowrap}
+.brand .logo{
+  width:34px; height:34px; border-radius:10px; display:grid; place-items:center;
+  background:linear-gradient(135deg,var(--accent-deep),var(--accent)); color:#fff; flex:none;
+}
+.topclock{margin-inline-start:auto; text-align:end; font-size:.85rem; color:var(--muted); line-height:1.35}
+.topclock b{color:var(--text); font-size:.95rem; font-weight:700}
+.iconbtn{
+  width:36px; height:36px; border-radius:10px; display:grid; place-items:center; flex:none;
+  border:1px solid var(--border); background:var(--card); color:var(--muted); transition:.15s;
+}
+.iconbtn:hover{color:var(--accent); border-color:var(--accent)}
+
+/* ---------- التبويبات ---------- */
+.tabs{border-bottom:1px solid var(--border); background:var(--bg2); position:sticky; top:57px; z-index:40}
+.tabs-in{max-width:1120px; margin:0 auto; padding:0 12px; display:flex; gap:2px; overflow-x:auto; scrollbar-width:none}
+.tabs-in::-webkit-scrollbar{display:none}
+.tab{
+  padding:11px 14px 9px; font-size:.92rem; font-weight:500; color:var(--muted); white-space:nowrap;
+  border-bottom:2px solid transparent; display:flex; align-items:center; gap:7px; transition:.15s;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent); border-bottom-color:var(--accent); font-weight:700}
+.tab .badge{
+  background:var(--bad); color:#fff; font-size:.68rem; font-weight:700; min-width:17px; height:17px;
+  border-radius:9px; display:inline-grid; place-items:center; padding:0 5px;
+}
+.tab .badge:empty{display:none}
+
+/* ---------- البطاقات والشبكات ---------- */
+main{padding-top:18px}
+.view{display:none; animation:fadein .18s ease}
+.view.active{display:block}
+@keyframes fadein{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+.grid{display:grid; gap:14px}
+.grid.dash{grid-template-columns:repeat(12,1fr)}
+.col3{grid-column:span 3} .col4{grid-column:span 4} .col5{grid-column:span 5}
+.col6{grid-column:span 6} .col7{grid-column:span 7} .col8{grid-column:span 8}
+.col12{grid-column:span 12}
+@media(max-width:960px){ .col3,.col4,.col5,.col6,.col7,.col8{grid-column:span 12} }
+.card{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+  padding:16px 18px; box-shadow:var(--shadow);
+}
+.card h3{font-size:.95rem; font-weight:700; color:var(--muted); display:flex; align-items:center; gap:8px; margin-bottom:12px}
+.card h3 .spacer{margin-inline-start:auto; font-size:.78rem; font-weight:500}
+.sechead{display:flex; align-items:center; gap:10px; margin:22px 0 12px; flex-wrap:wrap}
+.sechead h2{font-size:1.15rem; font-weight:800}
+.sechead .sub{color:var(--muted); font-size:.85rem}
+.sechead .spacer{margin-inline-start:auto}
+
+/* ---------- الأزرار ---------- */
+.btn{
+  display:inline-flex; align-items:center; gap:7px; padding:.55rem 1rem; border-radius:var(--radius-sm);
+  font-size:.92rem; font-weight:700; border:1px solid var(--border); background:var(--card2);
+  transition:.15s; white-space:nowrap;
+}
+.btn:hover{border-color:var(--border2); background:var(--border)}
+.btn.primary{background:var(--accent-deep); border-color:var(--accent-deep); color:#fff}
+.btn.primary:hover{background:var(--accent); border-color:var(--accent); color:#06251f}
+.btn.ok{background:var(--ok-soft); border-color:transparent; color:var(--ok)}
+.btn.warn{background:var(--warn-soft); border-color:transparent; color:var(--warn)}
+.btn.bad{background:var(--bad-soft); border-color:transparent; color:var(--bad)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:.3rem .65rem; font-size:.8rem; border-radius:8px}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+.btnrow{display:flex; gap:8px; flex-wrap:wrap; align-items:center}
+
+/* ---------- شارات ---------- */
+.tag{display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:700;
+  padding:2px 9px; border-radius:999px; background:var(--accent-soft); color:var(--accent)}
+.tag.gd{background:var(--gold-soft); color:var(--gold)}
+.tag.ok{background:var(--ok-soft); color:var(--ok)}
+.tag.warn{background:var(--warn-soft); color:var(--warn)}
+.tag.bad{background:var(--bad-soft); color:var(--bad)}
+.tag.info{background:var(--info-soft); color:var(--info)}
+.tag.gray{background:var(--bg2); color:var(--muted); border:1px solid var(--border)}
+
+/* ---------- بطاقة الوقت/الحالة ---------- */
+.bigclock{font-size:2.1rem; font-weight:800; letter-spacing:.5px; direction:ltr; text-align:end}
+.bigdate{color:var(--muted); font-size:.92rem; margin-top:2px}
+.statline{display:flex; gap:14px; flex-wrap:wrap; margin-top:12px}
+.statline .st{flex:1; min-width:70px; background:var(--card2); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:8px 10px; text-align:center}
+.statline .st b{display:block; font-size:1.15rem; font-weight:800}
+.statline .st span{font-size:.72rem; color:var(--muted)}
+.pct-ring{position:relative; width:96px; height:96px; margin-inline:auto}
+.pct-ring svg{transform:rotate(-90deg)}
+.pct-ring .val{position:absolute; inset:0; display:grid; place-items:center; font-weight:800; font-size:1.25rem}
+.kv{display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px dashed var(--border); font-size:.9rem}
+.kv:last-child{border-bottom:none}
+.kv .k{color:var(--muted)} .kv .v{font-weight:700}
+
+/* ---------- الصلاة ---------- */
+.prayers{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-top:6px}
+@media(max-width:640px){ .prayers{grid-template-columns:repeat(3,1fr)} }
+.pray{
+  background:var(--card2); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:10px 6px; text-align:center; transition:.2s;
+}
+.pray .nm{font-size:.8rem; color:var(--muted); font-weight:500}
+.pray .tm{font-size:1.05rem; font-weight:800; margin-top:3px; direction:ltr}
+.pray.next{border-color:var(--accent); background:var(--accent-soft)}
+.pray.next .nm{color:var(--accent)}
+.pray.passed{opacity:.45}
+.srcnote{margin-top:10px; font-size:.76rem; color:var(--faint); line-height:1.7}
+.badge-stale{background:var(--warn-soft); color:var(--warn); border-radius:999px;
+  padding:1px 9px; font-size:.72rem; font-weight:700}
+
+/* ---------- قائمة المهام ---------- */
+.tasklist{display:flex; flex-direction:column; gap:9px}
+.trow{
+  background:var(--card2); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:11px 13px; display:flex; gap:11px; align-items:flex-start; transition:.15s;
+}
+.trow:hover{border-color:var(--border2)}
+.trow.done{opacity:.62}
+.trow.missed{border-inline-start:3px solid var(--bad)}
+.trow.excused{border-inline-start:3px solid var(--info)}
+.trow.progress{border-inline-start:3px solid var(--warn)}
+.trow.done{border-inline-start:3px solid var(--ok)}
+.trow.pending{border-inline-start:3px solid var(--border2)}
+.trow.now{box-shadow:0 0 0 1px var(--accent)}
+.tico{width:34px; height:34px; border-radius:9px; background:var(--accent-soft); color:var(--accent);
+  display:grid; place-items:center; flex:none; margin-top:2px}
+.tbody{flex:1; min-width:0}
+.tname{font-weight:700; font-size:.95rem; display:flex; align-items:center; gap:7px; flex-wrap:wrap}
+.tdesc{font-size:.8rem; color:var(--muted); margin-top:2px; line-height:1.6}
+.ttime{font-size:.8rem; color:var(--muted); margin-top:4px; display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.ttime .clock{direction:ltr; display:inline-flex; gap:3px; align-items:center; font-weight:700; color:var(--text)}
+.tacts{display:flex; flex-direction:column; gap:5px; align-items:flex-end; flex:none}
+.statusrow{display:flex; gap:4px; flex-wrap:wrap; margin-top:7px}
+.schip{font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:999px;
+  border:1px solid var(--border); color:var(--muted); background:var(--bg2); transition:.12s}
+.schip:hover{border-color:var(--border2); color:var(--text)}
+.schip.sel.pending{background:var(--bg2); color:var(--text); border-color:var(--border2)}
+.schip.sel.progress{background:var(--warn-soft); color:var(--warn); border-color:var(--warn)}
+.schip.sel.done{background:var(--ok-soft); color:var(--ok); border-color:var(--ok)}
+.schip.sel.missed{background:var(--bad-soft); color:var(--bad); border-color:var(--bad)}
+.schip.sel.excused{background:var(--info-soft); color:var(--info); border-color:var(--info)}
+.completedAt{font-size:.72rem; color:var(--faint); margin-top:4px}
+
+/* ---------- الأسبوع ---------- */
+.weekgrid{display:grid; grid-template-columns:repeat(7,1fr); gap:10px}
+@media(max-width:960px){ .weekgrid{grid-template-columns:repeat(2,1fr)} }
+.daycard{background:var(--card2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 11px; min-height:120px}
+.daycard.today{border-color:var(--accent); background:var(--accent-soft)}
+.daycard h4{font-size:.9rem; font-weight:800; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center}
+.daycard .date{font-size:.7rem; color:var(--muted); font-weight:500}
+.wevent{display:flex; gap:6px; align-items:baseline; padding:4px 0; border-bottom:1px dashed var(--border); font-size:.78rem}
+.wevent:last-child{border-bottom:none}
+.wevent .t{direction:ltr; color:var(--accent); font-weight:700; font-size:.72rem; white-space:nowrap}
+.wevent .n{flex:1; line-height:1.5}
+
+/* ---------- العواقب ---------- */
+.crow{background:var(--card2); border:1px solid var(--border); border-inline-start:4px solid var(--warn);
+  border-radius:var(--radius-sm); padding:13px 15px; margin-bottom:10px}
+.crow .ctask{font-weight:800; font-size:.95rem}
+.crow .cmeta{font-size:.78rem; color:var(--muted); margin-top:2px}
+.crow .ctext{margin-top:8px; background:var(--warn-soft); color:var(--warn); border-radius:8px;
+  padding:8px 11px; font-size:.88rem; font-weight:500; line-height:1.7}
+.crow.resolved{opacity:.6; border-inline-start-color:var(--ok)}
+.crow .noteout{margin-top:8px; font-size:.83rem; color:var(--muted); background:var(--bg2);
+  border-radius:8px; padding:7px 10px; line-height:1.7}
+.crow textarea{margin-top:8px; min-height:60px; font-size:.85rem}
+
+/* ---------- التقويم الحراري ---------- */
+.heatwrap{display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start}
+.heat{display:grid; grid-template-columns:repeat(7,1fr); gap:5px; direction:rtl}
+.heat .wd{font-size:.68rem; color:var(--faint); text-align:center; font-weight:700; padding:2px}
+.hcell{width:34px; height:34px; border-radius:8px; background:var(--bg2); border:1px solid var(--border);
+  display:grid; place-items:center; font-size:.72rem; color:var(--muted); cursor:pointer; transition:.12s}
+.hcell:hover{border-color:var(--accent)}
+.hcell.out{opacity:.28; cursor:default}
+.hcell.sel{outline:2px solid var(--accent)}
+.leg{display:flex; gap:6px; align-items:center; font-size:.72rem; color:var(--faint); margin-top:10px}
+.leg i{width:14px; height:14px; border-radius:4px; display:inline-block}
+
+/* ---------- الجداول ---------- */
+.tbl{width:100%; border-collapse:collapse; font-size:.88rem}
+.tbl th{color:var(--muted); font-weight:700; text-align:start; padding:8px 10px; border-bottom:1px solid var(--border2); font-size:.8rem; white-space:nowrap}
+.tbl td{padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--card2)}
+.tblwrap{overflow-x:auto}
+.tdclock{direction:ltr; white-space:nowrap; font-weight:600}
+
+/* ---------- الوزن ---------- */
+.wchartbox{position:relative; width:100%; height:240px}
+canvas.chart{width:100%; height:100%; display:block}
+.wneutral{font-size:.78rem; color:var(--faint); background:var(--bg2); border-radius:8px; padding:8px 11px; line-height:1.8; margin-top:10px}
+
+/* ---------- التعلم ---------- */
+.skilltag{display:inline-flex; align-items:center; gap:6px; background:var(--accent-soft); color:var(--accent);
+  border-radius:999px; padding:4px 12px; font-size:.82rem; font-weight:700; margin:3px}
+.skilltag button{color:inherit; opacity:.7; display:grid; place-items:center}
+.skilltag button:hover{opacity:1}
+.hoursbig{font-size:1.6rem; font-weight:800}
+.hoursbig small{font-size:.8rem; color:var(--muted); font-weight:500}
+
+/* ---------- النوافذ المنبثقة ---------- */
+.overlay{position:fixed; inset:0; background:rgba(4,10,14,.66); z-index:100; display:none;
+  align-items:center; justify-content:center; padding:18px; backdrop-filter:blur(3px)}
+.overlay.open{display:flex}
+.modal{background:var(--card); border:1px solid var(--border2); border-radius:16px; width:100%;
+  max-width:520px; max-height:88vh; overflow-y:auto; padding:20px 22px; box-shadow:0 18px 60px rgba(0,0,0,.4)}
+.modal h3{font-size:1.05rem; font-weight:800; margin-bottom:14px; display:flex; gap:9px; align-items:center}
+.modal h3 .x{margin-inline-start:auto; width:30px; height:30px; border-radius:8px; display:grid; place-items:center; color:var(--muted)}
+.modal h3 .x:hover{background:var(--bg2); color:var(--text)}
+.frow{margin-bottom:12px}
+.frow label{display:block; font-size:.82rem; color:var(--muted); font-weight:700; margin-bottom:5px}
+.frow input,.frow select{width:100%}
+.frow .hint{font-size:.73rem; color:var(--faint); margin-top:4px; line-height:1.6}
+.fgrid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.chkrow{display:flex; gap:6px; flex-wrap:wrap}
+.chkrow label{display:inline-flex; align-items:center; gap:5px; background:var(--bg2); border:1px solid var(--border);
+  border-radius:8px; padding:5px 10px; font-size:.8rem; cursor:pointer; color:var(--muted); font-weight:500}
+.chkrow input{width:auto; accent-color:var(--accent)}
+.chkrow label:has(input:checked){border-color:var(--accent); color:var(--accent); background:var(--accent-soft)}
+.modal .btnrow{justify-content:flex-end; margin-top:6px}
+.dangerzone{border:1px solid var(--bad-soft); background:var(--bad-soft); border-radius:var(--radius-sm); padding:12px 14px}
+.daypill{display:inline-flex; gap:6px; align-items:center; background:var(--bg2); border:1px solid var(--border);
+  border-radius:999px; padding:5px 12px; font-size:.85rem; font-weight:700}
+
+/* ---------- التنبيهات Toast ---------- */
+#toasts{position:fixed; bottom:18px; inset-inline-start:18px; z-index:200; display:flex; flex-direction:column; gap:8px}
+.toast{background:var(--card); border:1px solid var(--border2); border-radius:11px; padding:10px 15px;
+  font-size:.88rem; font-weight:600; box-shadow:var(--shadow); display:flex; gap:9px; align-items:center;
+  animation:toastin .2s ease; max-width:340px}
+.toast.ok{border-inline-start:4px solid var(--ok)} .toast.bad{border-inline-start:4px solid var(--bad)}
+.toast.info{border-inline-start:4px solid var(--info)} .toast.warn{border-inline-start:4px solid var(--warn)}
+@keyframes toastin{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+
+/* ---------- حالات فارغة ---------- */
+.empty{text-align:center; color:var(--faint); padding:26px 12px; font-size:.9rem; line-height:1.8}
+.empty .ico{opacity:.5; margin-bottom:6px}
+
+/* ---------- إشعار المنطقة ---------- */
+.srcbox{background:var(--card2); border:1px dashed var(--border2); border-radius:var(--radius-sm);
+  padding:11px 13px; font-size:.82rem; color:var(--muted); line-height:1.9}
+.srcbox b{color:var(--text)}
+.kbd{background:var(--bg2); border:1px solid var(--border2); border-radius:6px; padding:1px 7px;
+  font-size:.78rem; direction:ltr; display:inline-block; font-weight:700}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="logo" id="logo-ic"></span>لوحة يومي</div>
+    <div class="topclock"><b id="clock-time">--:--</b><br><span id="clock-date">—</span></div>
+    <button class="iconbtn" id="btn-theme" title="تبديل المظهر" aria-label="تبديل المظهر"></button>
+  </div>
+</header>
+
+<nav class="tabs"><div class="tabs-in" id="tabsbar">
+  <button class="tab active" data-tab="dashboard" id="tab-dashboard">الرئيسية</button>
+  <button class="tab" data-tab="today">مهام اليوم</button>
+  <button class="tab" data-tab="week">الروتين الأسبوعي</button>
+  <button class="tab" data-tab="consequences">العواقب المستحقة <span class="badge" id="badge-cons"></span></button>
+  <button class="tab" data-tab="weight">سجل الوزن</button>
+  <button class="tab" data-tab="reports">السجل والتقارير</button>
+  <button class="tab" data-tab="learning">التعلم والتطوير</button>
+  <button class="tab" data-tab="settings">الإعدادات</button>
+</div></nav>
+
+<div class="wrap">
+<main>
+
+<!-- ═══════════ 1) الرئيسية ═══════════ -->
+<section class="view active" id="view-dashboard">
+  <div class="grid dash">
+
+    <div class="card col5">
+      <h3 id="ic-now">الآن</h3>
+      <div class="bigclock" id="dash-clock">--:--</div>
+      <div class="bigdate" id="dash-date">—</div>
+      <div style="margin-top:14px" id="dash-current-task"></div>
+      <div id="dash-next-task" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card col3">
+      <h3 id="ic-progress">إنجاز اليوم</h3>
+      <div class="pct-ring">
+        <svg width="96" height="96"><circle cx="48" cy="48" r="41" fill="none" stroke="var(--bg2)" stroke-width="9"/>
+        <circle id="ring-arc" cx="48" cy="48" r="41" fill="none" stroke="var(--accent)" stroke-width="9"
+          stroke-linecap="round" stroke-dasharray="0 999"/></svg>
+        <div class="val" id="day-pct">0%</div>
+      </div>
+      <div class="statline">
+        <div class="st"><b id="st-done" style="color:var(--ok)">0</b><span>مكتملة</span></div>
+        <div class="st"><b id="st-rem" style="color:var(--info)">0</b><span>متبقية</span></div>
+        <div class="st"><b id="st-miss" style="color:var(--bad)">0</b><span>فائتة</span></div>
+      </div>
+    </div>
+
+    <div class="card col4">
+      <h3 id="ic-pray">الصلوات الخمس <span class="spacer" id="prayer-stale-badge"></span></h3>
+      <div class="prayers" id="dash-prayers"></div>
+      <div style="margin-top:10px" id="dash-next-prayer"></div>
+      <div class="srcnote" id="prayer-srcnote">—</div>
+    </div>
+
+    <div class="card col4">
+      <h3 id="ic-cons">العواقب المستحقة <span class="spacer" id="dash-cons-count"></span></h3>
+      <div id="dash-cons-list"></div>
+    </div>
+
+    <div class="card col4">
+      <h3 id="ic-weight">سجل الوزن <span class="spacer tag gray">اختياري</span></h3>
+      <div id="dash-weight"></div>
+    </div>
+
+    <div class="card col4">
+      <h3 id="ic-weeksum">ملخص الأسبوع</h3>
+      <div id="dash-week"></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════ 2) مهام اليوم ═══════════ -->
+<section class="view" id="view-today">
+  <div class="sechead">
+    <h2 id="today-title">مهام اليوم</h2>
+    <span class="sub" id="today-sub"></span>
+    <span class="spacer"></span>
+    <button class="btn ghost sm" id="btn-day-prev">السابق</button>
+    <input type="date" id="today-date" style="width:160px">
+    <button class="btn ghost sm" id="btn-day-next">التالي</button>
+    <button class="btn ghost sm" id="btn-day-today">اليوم</button>
+    <button class="btn primary" id="btn-add-task"></button>
+  </div>
+  <div class="card"><div id="today-stats" class="statline" style="margin:0 0 14px"></div>
+    <div class="tasklist" id="today-list"></div>
+  </div>
+</section>
+
+<!-- ═══════════ 3) الروتين الأسبوعي ═══════════ -->
+<section class="view" id="view-week">
+  <div class="sechead">
+    <h2>الروتين الأسبوعي</h2>
+    <span class="sub">الجدول الكامل للأسبوع — مواقيت الصلوات تتبع الأذان الفعلي تلقائيًا</span>
+  </div>
+  <div class="weekgrid" id="week-grid"></div>
+  <div class="srcbox" style="margin-top:14px">
+    <b>ملاحظات الجدول:</b> الخروج للمدرسة 6:00 صباحًا بالضبط (الأحد–الخميس) والعودة بين 2:15 و2:30 ظهرًا •
+    الجيم 6:15 مساءً بالدراجة (3 كم لكل اتجاه) في الاثنين والثلاثاء والأربعاء والسبت •
+    كرة القدم 4:30 مساءً (الأحد والخميس) والعودة بين 7:00 و8:00 م •
+    دروس القرآن 4:00 م (الاثنين والأربعاء) تنتهي 5:15 م والعودة حوالي 6:00 م •
+    الجمعة يوم راحة مع صلاة الجمعة ومراجعة أسبوعية للإنجازات.
+  </div>
+</section>
+
+<!-- ═══════════ 4) العواقب المستحقة ═══════════ -->
+<section class="view" id="view-consequences">
+  <div class="sechead">
+    <h2>العواقب المستحقة</h2>
+    <span class="sub">عواقب بسيطة تلقائية للمهام التي لم تُنجز — بدون أي عقوبة مؤذية</span>
+  </div>
+  <div id="cons-list"></div>
+  <div class="sechead"><h2 style="font-size:.95rem">تم تنفيذها / ملغاة</h2></div>
+  <div id="cons-done-list"></div>
+  <div class="srcbox" style="margin-top:14px">
+    تولّد العاقبة تلقائيًا عند انتهاء موعد مهمة غير مكتملة، وتتغير العاقبة بين قائمة يمكنك تعديلها من
+    <b>الإعدادات</b>. يمكنك دائمًا اختيار <b>عذر مقبول</b> من حالات المهمة إذا كان الظرف خارجًا عن إرادتك،
+    فلن تولد أي عاقبة حينها. لا تُصدر عاقبة أبدًا لمهمة محذوفة أو نقلت موعدها قبل انتهائه.
+  </div>
+</section>
+
+<!-- ═══════════ 5) سجل الوزن ═══════════ -->
+<section class="view" id="view-weight">
+  <div class="sechead">
+    <h2>سجل الوزن</h2>
+    <span class="sub">تسجيل اختياري تمامًا — قراءة واحدة يوميًا بالكيلوجرام</span>
+    <span class="spacer"></span>
+    <button class="btn primary" id="btn-weight-add"></button>
+  </div>
+  <div class="grid dash">
+    <div class="card col5">
+      <h3 id="ic-wchart">منحنى الوزن</h3>
+      <div class="btnrow" style="margin-bottom:10px" id="weight-range-btns"></div>
+      <div class="wchartbox"><canvas class="chart" id="weight-chart"></canvas></div>
+      <div class="btnrow" style="margin-top:12px; align-items:flex-end">
+        <div><label style="font-size:.75rem;color:var(--muted)">من</label><br><input type="date" id="weight-avg-from"></div>
+        <div><label style="font-size:.75rem;color:var(--muted)">إلى</label><br><input type="date" id="weight-avg-to"></div>
+        <button class="btn sm" id="btn-weight-avg">متوسط الفترة</button>
+        <span id="weight-avg-out" style="font-weight:800"></span>
+      </div>
+    </div>
+    <div class="card col7">
+      <h3 id="ic-wtable">القياسات</h3>
+      <div class="tblwrap"><table class="tbl" id="weight-table"></table></div>
+      <div class="wneutral">
+        سجل الوزن هنا لأغراض المتابعة الشخصية فقط: لا يوجد هدف للخسارة أو الزيادة، ولا وصلة للأرقام،
+        والوزن ليس مقياسًا لنجاحك أو التزامك. يمكنك تخطي أي يوم دون أي تنبيه، وبياناتك محفوظة على جهازك
+        ولا تُشارك مع أي شخص، وتُصدَّر ضمن النسخة الاحتياطية.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 6) السجل والتقارير ═══════════ -->
+<section class="view" id="view-reports">
+  <div class="sechead">
+    <h2>سجل الإنجازات والتقارير</h2>
+    <span class="sub">كل الأيام السابقة محفوظة — اختر أي يوم لمراجعة ما حدث فيه</span>
+    <span class="spacer"></span>
+    <button class="btn ghost sm" id="btn-heat-prev">الشهر السابق</button>
+    <span class="daypill" id="heat-label"></span>
+    <button class="btn ghost sm" id="btn-heat-next">الشهر التالي</button>
+  </div>
+  <div class="card">
+    <div class="heatwrap">
+      <div class="heat" id="heat-cal"></div>
+      <div style="flex:1; min-width:260px" id="heat-legend-box"></div>
+    </div>
+  </div>
+  <div id="day-detail" style="margin-top:14px"></div>
+  <div class="grid dash" style="margin-top:14px">
+    <div class="card col6"><h3 id="ic-wchart2">نسبة الإنجاز الأسبوعية (آخر 8 أسابيع)</h3>
+      <div class="wchartbox"><canvas class="chart" id="chart-weekly"></canvas></div></div>
+    <div class="card col6"><h3 id="ic-mchart">المهام المكتملة شهريًا (هذا العام)</h3>
+      <div class="wchartbox"><canvas class="chart" id="chart-monthly"></canvas></div></div>
+    <div class="card col6"><h3 id="ic-best">أفضل الأيام</h3><div id="best-days"></div></div>
+    <div class="card col6"><h3 id="ic-monstat">إحصائيات الشهر الحالي</h3><div id="month-stats"></div></div>
+  </div>
+</section>
+
+<!-- ═══════════ 7) التعلم والتطوير ═══════════ -->
+<section class="view" id="view-learning">
+  <div class="sechead">
+    <h2>التعلم والتطوير الشخصي</h2>
+    <span class="sub">متابعة جلسات التعلم وساعات التطوير أسبوعيًا وشهريًا</span>
+    <span class="spacer"></span>
+    <button class="btn primary" id="btn-learn-add"></button>
+  </div>
+  <div class="grid dash">
+    <div class="card col4">
+      <h3 id="ic-skill">المهارات</h3>
+      <div id="skills-list"></div>
+      <div class="btnrow" style="margin-top:10px">
+        <input type="text" id="new-skill" placeholder="مهارة جديدة…" style="flex:1; min-width:120px">
+        <button class="btn sm" id="btn-skill-add">إضافة</button>
+      </div>
+    </div>
+    <div class="card col8">
+      <h3 id="ic-hours">ساعات التعلم (آخر 8 أسابيع)</h3>
+      <div class="wchartbox"><canvas class="chart" id="chart-learning"></canvas></div>
+    </div>
+    <div class="card col12">
+      <h3 id="ic-summ">الإجماليات</h3>
+      <div class="statline" style="margin:0" id="learn-totals"></div>
+    </div>
+    <div class="card col12">
+      <h3 id="ic-sess">الجلسات</h3>
+      <div class="tblwrap"><table class="tbl" id="learn-table"></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 8) الإعدادات ═══════════ -->
+<section class="view" id="view-settings">
+  <div class="sechead"><h2>الإعدادات</h2></div>
+  <div class="grid dash">
+
+    <div class="card col6">
+      <h3 id="ic-look">المظهر والوقت</h3>
+      <div class="frow"><label>المظهر</label>
+        <div class="btnrow">
+          <button class="btn sm" id="set-theme-dark">داكن</button>
+          <button class="btn sm" id="set-theme-light">فاتح</button>
+        </div>
+      </div>
+      <div class="frow"><label>طريقة عرض الوقت</label>
+        <select id="set-timeformat">
+          <option value="ar">نظام 12 ساعة — ص / م</option>
+          <option value="en">نظام 12 ساعة — AM / PM</option>
+          <option value="24">نظام 24 ساعة</option>
+        </select>
+        <div class="hint">الافتراضي نظام 12 ساعة: مثال <span id="fmt-demo"></span></div>
+      </div>
+    </div>
+
+    <div class="card col6">
+      <h3 id="ic-prayset">مواقيت الصلاة</h3>
+      <div id="prayer-settings-info"></div>
+      <div class="btnrow" style="margin-top:10px">
+        <button class="btn primary sm" id="btn-prayer-fetch">تحديث المواقيت الآن</button>
+        <button class="btn sm" id="btn-prayer-manual">إدخال يدوي</button>
+        <button class="btn sm" id="btn-prayer-auto">استعادة الجلب التلقائي</button>
+      </div>
+      <div class="hint" style="font-size:.73rem;color:var(--faint);margin-top:8px;line-height:1.8">
+        المصدر الوحيد للمواقيت هو صفحة مسقط في موقع الأوائل. الإدخال اليدوي للاستخدام الضروري فقط
+        ويُعلَّم داخل التطبيق أنه يدوي، ويمكن الرجوع للجلب التلقائي في أي لحظة.
+      </div>
+    </div>
+
+    <div class="card col6">
+      <h3 id="ic-consset">قائمة العواقب</h3>
+      <textarea id="set-cons" rows="7"></textarea>
+      <div class="hint">عاقبة واحدة في كل سطر — تُطبَّق بالتناوب تلقائيًا على المهام الفائتة.</div>
+      <div class="btnrow" style="margin-top:8px"><button class="btn primary sm" id="btn-cons-save">حفظ القائمة</button></div>
+    </div>
+
+    <div class="card col6">
+      <h3 id="ic-taskset">المهام والروتين</h3>
+      <div id="task-manager" style="max-height:340px; overflow-y:auto"></div>
+      <div class="btnrow" style="margin-top:10px"><button class="btn primary sm" id="btn-task-new"></button></div>
+    </div>
+
+    <div class="card col6">
+      <h3 id="ic-data">البيانات والنسخ الاحتياطي</h3>
+      <div class="btnrow">
+        <button class="btn primary sm" id="btn-export">تصدير كل البيانات (JSON)</button>
+        <button class="btn sm" id="btn-import">استيراد نسخة احتياطية</button>
+        <input type="file" id="import-file" accept=".json,application/json" style="display:none">
+      </div>
+      <div class="hint" style="margin-top:8px">التصدير يشمل المهام والسجلات وسجل الوزن والتعلم والإعدادات والمواقيت المخزنة.</div>
+      <div class="dangerzone" style="margin-top:14px">
+        <b style="color:var(--bad)">إعادة ضبط التقدم</b>
+        <div style="font-size:.8rem;color:var(--muted);margin:6px 0;line-height:1.8">
+          يحذف كل المهام والسجلات والوزن والإعدادات نهائيًا من هذا المتصفح. اكتب كلمة
+          <span class="kbd">إعادة ضبط</span> في المربع ثم اضغط الزر.
+        </div>
+        <div class="btnrow">
+          <input type="text" id="reset-confirm" placeholder="اكتب: إعادة ضبط" style="flex:1">
+          <button class="btn bad sm" id="btn-reset" disabled>إعادة الضبط نهائيًا</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card col12">
+      <h3 id="ic-about">حول التطبيق</h3>
+      <div class="srcbox">
+        <b>لوحة يومي</b> — تطبيق شخصي لإدارة الروتين والمهام يعمل بالكامل داخل المتصفح.
+        البيانات تُحفظ تلقائيًا في <span class="kbd">LocalStorage</span> على هذا الجهاز: لا حاجة لزر حفظ،
+        ولا تُفقد بعد إغلاق المتصفح، ولا تُرسل لأي خادم. مواقيت الصلاة تُجلب من
+        <b>al-awail.com</b> (صفحة مسقط — سلطنة عُمان) عبر وسطاء جلب آمنين عند منع المتصفح للقراءة المباشرة (CORS)،
+        وعند تعذر الاتصال يُعرض آخر مواقيت صحيحة مع وسم أنها قديمة — ولا تُعرض أبدًا مواقيت مُختلقة.
+        لضمان عدم فقدان البيانات عند مسح بيانات المتصفح: صدّر نسخة احتياطية دوريًا من قسم البيانات أعلاه.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+</div>
+
+<!-- ═══════════ النوافذ المنبثقة ═══════════ -->
+<div class="overlay" id="ov-task"><div class="modal">
+  <h3 id="task-modal-title">مهمة <button class="x" data-close="ov-task">✕</button></h3>
+  <div class="frow"><label>اسم المهمة *</label><input type="text" id="tf-name" maxlength="120" placeholder="مثال: مراجعة الرياضيات"></div>
+  <div class="frow"><label>الوصف</label><textarea id="tf-desc" rows="2" placeholder="تفاصيل اختيارية…"></textarea></div>
+  <div class="fgrid2">
+    <div class="frow"><label>وقت البداية *</label><input type="time" id="tf-start"></div>
+    <div class="frow"><label>وقت النهاية *</label><input type="time" id="tf-end"></div>
+  </div>
+  <div class="fgrid2">
+    <div class="frow"><label>الأولوية</label><select id="tf-priority">
+      <option value="high">عالية</option><option value="mid" selected>متوسطة</option><option value="low">منخفضة</option>
+    </select></div>
+    <div class="frow"><label>التكرار</label><select id="tf-repeat">
+      <option value="once">مرة واحدة (يوم محدد)</option>
+      <option value="daily">يوميًا</option>
+      <option value="weekly">أيام محددة من الأسبوع</option>
+    </select></div>
+  </div>
+  <div class="frow" id="tf-date-row"><label>التاريخ *</label><input type="date" id="tf-date"></div>
+  <div class="frow" id="tf-days-row"><label>أيام التكرار</label>
+    <div class="chkrow" id="tf-days"></div>
+  </div>
+  <div class="frow" id="tf-active-row"><label style="display:flex;align-items:center;gap:8px;color:var(--text)">
+    <input type="checkbox" id="tf-active" checked style="width:auto"> التكرار مفعّل
+    <span class="hint" style="margin:0">إيقاف التكرار لا يحذف أي سجل سابق.</span>
+  </label></div>
+  <div class="frow" id="tf-scope-row" style="display:none"><label>تطبيق التعديل على</label>
+    <select id="tf-scope"><option value="all">كل الأيام (نفس المهمة المتكررة)</option><option value="one">هذا اليوم فقط</option></select>
+  </div>
+  <div class="btnrow">
+    <button class="btn ghost" data-close="ov-task">إلغاء</button>
+    <button class="btn primary" id="btn-task-save">حفظ المهمة</button>
+  </div>
+</div></div>
+
+<div class="overlay" id="ov-move"><div class="modal">
+  <h3 id="ic-move">نقل المهمة إلى يوم آخر <button class="x" data-close="ov-move">✕</button></h3>
+  <div class="srcbox" style="margin-bottom:12px" id="move-task-info"></div>
+  <div class="frow"><label>التاريخ الجديد</label><input type="date" id="move-date"></div>
+  <div class="hint" style="font-size:.75rem;color:var(--faint);margin-bottom:10px;line-height:1.7">
+    نقل المهمة قبل انتهاء موعدها يمنع توليد أي عاقبة عنها، وتظهر في اليوم الجديد بنفس بياناتها.
+  </div>
+  <div class="btnrow">
+    <button class="btn ghost" data-close="ov-move">إلغاء</button>
+    <button class="btn primary" id="btn-move-save">نقل</button>
+  </div>
+</div></div>
+
+<div class="overlay" id="ov-weight"><div class="modal">
+  <h3 id="ic-wmodal">تسجيل الوزن <button class="x" data-close="ov-weight">✕</button></h3>
+  <div class="frow"><label>التاريخ</label><input type="date" id="wf-date"></div>
+  <div class="frow"><label>الوزن (كجم) *</label><input type="number" id="wf-kg" step="0.1" min="20" max="400" placeholder="مثال: 62.5" style="direction:ltr;text-align:center"></div>
+  <div class="hint" style="font-size:.75rem;color:var(--faint);margin-bottom:8px">قراءة واحدة لكل يوم — الحفظ فوق قراءة اليوم إذا وُجدت.</div>
+  <div class="btnrow">
+    <button class="btn ghost" data-close="ov-weight">إلغاء</button>
+    <button class="btn primary" id="btn-weight-save">حفظ القراءة</button>
+  </div>
+</div></div>
+
+<div class="overlay" id="ov-learn"><div class="modal">
+  <h3 id="ic-lmodal">تسجيل جلسة تعلم <button class="x" data-close="ov-learn">✕</button></h3>
+  <div class="fgrid2">
+    <div class="frow"><label>التاريخ</label><input type="date" id="lf-date"></div>
+    <div class="frow"><label>المهارة *</label><select id="lf-skill"></select></div>
+  </div>
+  <div class="frow"><label>مدة الجلسة (دقائق) *</label><input type="number" id="lf-min" min="1" max="720" placeholder="مثال: 45"></div>
+  <div class="frow"><label>ما أنجزته في الجلسة</label><textarea id="lf-note" rows="2" placeholder="مثال: تدربت على تدرج الألوان في DaVinci Resolve"></textarea></div>
+  <div class="btnrow">
+    <button class="btn ghost" data-close="ov-learn">إلغاء</button>
+    <button class="btn primary" id="btn-learn-save">حفظ الجلسة</button>
+  </div>
+</div></div>
+
+<div class="overlay" id="ov-prayer"><div class="modal">
+  <h3 id="ic-pmodal">إدخال مواقيت يدوي <button class="x" data-close="ov-prayer">✕</button></h3>
+  <div class="frow"><label>التاريخ</label><input type="date" id="pf-date"></div>
+  <div class="fgrid2" id="pf-fields"></div>
+  <div class="hint" style="font-size:.75rem;color:var(--faint);margin:8px 0;line-height:1.7">
+    يُستخدم هذا الإدخال عند تعذر الاتصال بالموقع نهائيًا، ويظهر في التطبيق بوسم «يدوي».
+    إذا وجدنا مواقيت اليوم في الإدخال اليدوي فستُعتمد وتُحدَّث مهام الصلاة المرتبطة بها.
+  </div>
+  <div class="btnrow">
+    <button class="btn ghost" data-close="ov-prayer">إلغاء</button>
+    <button class="btn primary" id="btn-prayer-manual-save">حفظ المواقيت</button>
+  </div>
+</div></div>
+
+<div class="overlay" id="ov-confirm"><div class="modal" style="max-width:430px">
+  <h3 id="confirm-title">تأكيد</h3>
+  <div id="confirm-body" style="font-size:.92rem; line-height:1.9; color:var(--muted)"></div>
+  <div class="btnrow" style="margin-top:16px">
+    <button class="btn ghost" id="confirm-no">إلغاء</button>
+    <button class="btn bad" id="confirm-yes">تأكيد</button>
+  </div>
+</div></div>
+
+<div id="toasts"></div>
+<script>
+/* ════════════════════════════════════════════════════════════
+   لوحة يومي — Daily Life Dashboard
+   ملف واحد: HTML + CSS + JS — يعمل بالكامل في المتصفح بدون خادم
+   الحفظ: LocalStorage تلقائيًا عند كل تغيير
+   ════════════════════════════════════════════════════════════ */
+'use strict';
+
+/* ─────────── أدوات عامة ─────────── */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+
+const WEEK_AR  = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const WEEK_MIN = ['أحد','إثن','ثلا','أرب','خمي','جمع','سبت'];
+const MONTHS_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+
+function pad2(n){ return String(n).padStart(2,'0'); }
+function dstr(d){ return d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate()); }
+function todayStr(){ return dstr(new Date()); }
+function parseD(s){ const [y,m,dd] = s.split('-').map(Number); return new Date(y, m-1, dd); }
+function addDays(s, n){ const d = parseD(s); d.setDate(d.getDate()+n); return dstr(d); }
+function weekdayOf(s){ return parseD(s).getDay(); } // 0=الأحد
+/* أسبوع يبدأ الأحد */
+function weekStartOf(s){ const d = parseD(s); d.setDate(d.getDate() - d.getDay()); return dstr(d); }
+function fmtDate(s){ const d = parseD(s); return WEEK_AR[d.getDay()] + '، ' + d.getDate() + ' ' + MONTHS_AR[d.getMonth()] + ' ' + d.getFullYear(); }
+function fmtDateShort(s){ const d = parseD(s); return d.getDate() + ' ' + MONTHS_AR[d.getMonth()]; }
+function monthLabel(ym){ const [y,m] = ym.split('-').map(Number); return MONTHS_AR[m-1] + ' ' + y; }
+/* مدة بالدقائق → "س س د د" */
+function fmtDur(min){
+  min = Math.max(0, Math.round(min));
+  const h = Math.floor(min/60), m = min%60;
+  if (h && m) return h + ' س ' + m + ' د';
+  if (h) return h + ' ساعة' + (h>1?'ات':'');
+  return m + ' دقيقة' + (m>1?'':'');
+}
+/* تنسيق الوقت — 12 ساعة افتراضيًا (ص/م أو AM/PM) أو 24 */
+function fmtTimeStr(s, fmt){
+  if (!s) return '—';
+  const [h,m] = s.split(':').map(Number);
+  if (fmt === '24') return pad2(h) + ':' + pad2(m);
+  const suf = h < 12 ? (fmt==='en' ? 'AM' : 'ص') : (fmt==='en' ? 'PM' : 'م');
+  let h12 = h % 12; if (h12 === 0) h12 = 12;
+  return h12 + ':' + pad2(m) + ' ' + suf;
+}
+function tf(s){ return fmtTimeStr(s, state.settings.timeFormat); } // shorthand
+function hhmmToMin(s){ const [h,m] = s.split(':').map(Number); return h*60 + m; }
+function minToHHMM(min){ min = Math.round(min); min = ((min % 1440) + 1440) % 1440; return pad2(Math.floor(min/60)) + ':' + pad2(min%60); }
+function nowMin(){ const d = new Date(); return d.getHours()*60 + d.getMinutes() + d.getSeconds()/60; }
+function fmtHijri(d){
+  try{ return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura', {day:'numeric', month:'long', year:'numeric'}).format(d); }
+  catch(e){ return ''; }
+}
+function toast(msg, type){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type||'info');
+  t.innerHTML = icon(type==='ok'?'check':type==='bad'?'x':'bell') + '<span>' + esc(msg) + '</span>';
+  $('#toasts').appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(), 320); }, 3400);
+}
+function confirmBox(title, body, yesLabel){
+  return new Promise(res=>{
+    $('#confirm-title').textContent = title;
+    $('#confirm-body').innerHTML = body;
+    const yes = $('#confirm-yes'); yes.textContent = yesLabel || 'تأكيد';
+    const ov = $('#ov-confirm'); ov.classList.add('open');
+    const done = v => { ov.classList.remove('open'); yes.onclick=null; $('#confirm-no').onclick=null; res(v); };
+    yes.onclick = () => done(true);
+    $('#confirm-no').onclick = () => done(false);
+  });
+}
+function openModal(id){ $(id ? '#'+id : id).classList.add('open'); }
+function closeModal(id){ $('#'+id).classList.remove('open'); }
+
+/* ─────────── أيقونات SVG بسيطة ─────────── */
+const ICONS = {
+  sun:'<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',
+  moon:'<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/>',
+  mosque:'<path d="M12 3c2.8 2.2 4.5 4.3 4.5 6.5H7.5C7.5 7.3 9.2 5.2 12 3z"/><path d="M4 21h16M5.5 21V12M18.5 21V12M9.5 21v-5a2.5 2.5 0 0 1 5 0v5"/>',
+  school:'<path d="M3 9.5 12 4l9 5.5M5 10v8M19 10v8M3 20h18M9 20v-5h6v5M12 7.5v2"/>',
+  gym:'<path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/>',
+  ball:'<circle cx="12" cy="12" r="8.5"/><path d="M12 8.5 15 11l-1.1 3.6h-3.8L9 11zM12 8.5V3.6M15 11l4.7-1.5M13.9 14.6l2.9 3.8M10.1 14.6l-2.9 3.8M9 11L4.3 9.5"/>',
+  book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM20 18H6.5A2.5 2.5 0 0 0 4 20.5"/>',
+  bike:'<circle cx="5.5" cy="17" r="3.2"/><circle cx="18.5" cy="17" r="3.2"/><path d="M5.5 17 9 9h4.5M9 9l4 8M18.5 17l-3-8H12M13 9l2-2.5"/>',
+  food:'<path d="M5 3v7a2 2 0 0 0 2 2h0V3M7 12v9M15 3c-1.8 1.2-2.5 3.4-2.5 5.5S13.5 12 15 12v9M15 3v18"/>',
+  home:'<path d="M4 11.5 12 4.5l8 7M6 10v9.5h12V10M10 19.5v-5h4v5"/>',
+  target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/>',
+  chart:'<path d="M4 20h16M6.5 20v-6M11 20V8M15.5 20v-9M20 20V5"/>',
+  clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5.2l3.2 2"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  edit:'<path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17z"/><path d="M13.5 6.5l3 3"/>',
+  trash:'<path d="M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5"/>',
+  move:'<path d="M12 3v18M3 12h18M12 3 9 6M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/>',
+  check:'<path d="M4.5 12.5 10 18 19.5 7"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  scale:'<path d="M12 3.5v17M7 6.5h10M5 20.5h14"/><path d="M7 6.5 4 12a3 3 0 0 0 6 0zM17 6.5 14 12a3 3 0 0 0 6 0z"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8 13.2 5a7.3 7.3 0 0 1 2.5 1l2.4-.7 1.5 2.6-1.7 1.9a7.6 7.6 0 0 1 0 2.8l1.7 1.9-1.5 2.6-2.4-.7a7.3 7.3 0 0 1-2.5 1L12 21.2 10.8 19a7.3 7.3 0 0 1-2.5-1l-2.4.7-1.5-2.6 1.7-1.9a7.6 7.6 0 0 1 0-2.8L4.4 8.9 5.9 6.3l2.4.7a7.3 7.3 0 0 1 2.5-1z"/>',
+  calendar:'<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 2.8V6.5M16 2.8V6.5"/>',
+  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l1.8 2.5H4.2z"/><path d="M10 21a2.2 2.2 0 0 0 4 0"/>',
+  refresh:'<path d="M20 12a8 8 0 1 1-2.3-5.6M20 3.5V8h-4.5"/>',
+  download:'<path d="M12 4v11M7.5 11.5 12 16l4.5-4.5M4.5 19.5h15"/>',
+  upload:'<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5M4.5 19.5h15"/>',
+  play:'<path d="M7 5.5v13l11-6.5z"/>',
+  star:'<path d="M12 3.5l2.5 5.4 5.9.7-4.3 4 1.1 5.9-5.2-2.9-5.2 2.9 1.1-5.9-4.3-4 5.9-.7z"/>',
+  note:'<path d="M6 3.5h9.5L19.5 8v12.5h-13.5zM15 3.5V8h4.5M9 12.5h6M9 16h6"/>',
+  compass:'<circle cx="12" cy="12" r="8.5"/><path d="M14.8 9.2 13 13l-3.8 1.8L11 11z"/>',
+  dash:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/>',
+  uturn:'<path d="M8 5v9a4 4 0 0 0 8 0V9.5M12.5 6 8 2.5 3.5 6" transform="rotate(180 12 12)"/>'
+};
+function icon(name, size){
+  const s = size || 18;
+  return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + (ICONS[name]||ICONS.clock) + '</svg>';
+}
+
+/* ─────────── الحالة والتخزين (LocalStorage) ─────────── */
+const LS_KEY = 'dld_state_v1';
+const APP_VERSION = 1;
+
+const DEFAULT_CONSEQUENCES = [
+  'رتّب مكتبك أو مساحة عملك لمدة 10 دقائق.',
+  'اكتب سبب عدم إنجاز المهمة وكيفية تجنّبه مستقبلًا.',
+  'أعد جدولة المهمة في وقت مناسب من اليوم أو الغد.',
+  'خصّص 10 دقائق لتنظيم جدول اليوم التالي.',
+  'اقرأ صفحة أو صفحتين من كتاب لمدة 10 دقائق.',
+  'خصّص 15 دقيقة لمراجعة ما تعلمته اليوم وتدوين ملاحظة واحدة.'
+];
+
+let state = null;
+
+function seedTemplates(){
+  const T = (id, name, start, end, days, priority, ic, desc, extra) => Object.assign({
+    id, name, desc: desc||'', start, end, days, priority, icon: ic, cat: 'routine',
+    repeat: 'weekly', date: null, active: true, linkedPrayer: null
+  }, extra||{});
+  const SD = [0,1,2,3,4]; // أيام المدرسة: الأحد إلى الخميس
+  return [
+    // ── الصلوات الخمس: تتبع الأذان الفعلي من موقع الأوائل ──
+    T('p-fajr','صلاة الفجر','05:00','05:30',[0,1,2,3,4,5,6],'high','mosque','في وقت الأذان الفعلي — يتحدث تلقائيًا من مواقيت مسقط.',{linkedPrayer:'fajr'}),
+    T('p-dhuhr','صلاة الظهر','12:15','12:45',[0,1,2,3,4,5,6],'high','mosque','في وقت الأذان الفعلي.',{linkedPrayer:'dhuhr'}),
+    T('p-asr','صلاة العصر','15:30','16:00',[0,1,2,3,4,5,6],'high','mosque','في وقت الأذان الفعلي.',{linkedPrayer:'asr'}),
+    T('p-maghrib','صلاة المغرب','17:45','18:15',[0,1,2,3,4,5,6],'high','mosque','في وقت الأذان الفعلي.',{linkedPrayer:'maghrib'}),
+    T('p-isha','صلاة العشاء','19:20','19:50',[0,1,2,3,4,5,6],'high','mosque','في وقت الأذان الفعلي.',{linkedPrayer:'isha'}),
+    // ── أيام المدرسة (الأحد–الخميس) ──
+    T('wake','الاستيقاظ والاستعداد','05:00','05:15',SD,'mid','sun','الاستيقاظ بين 5:00 و5:15 صباحًا.'),
+    T('breakfast','الفطور والاستعداد للمدرسة','05:15','05:55',SD,'low','food','حتى الخروج من المنزل 6:00 صباحًا بالضبط.'),
+    T('school','المدرسة','06:00','14:30',SD,'high','school','الخروج من المنزل 6:00 صباحًا — العودة بين 2:15 و2:30 ظهرًا.'),
+    T('lunchA','الغداء والراحة','14:30','16:00',[0,2,4],'low','home','بعد العودة من المدرسة.'),
+    T('lunchB','الغداء والراحة','14:30','15:45',[1,3],'low','home','بعد العودة من المدرسة — قبل درس القرآن.'),
+    T('fbPrep','الاستعداد لكرة القدم','16:00','16:25',[0,4],'low','ball','حتى الخروج 4:30 مساءً.'),
+    T('football','كرة القدم','16:30','20:00',[0,4],'mid','ball','الخروج 4:30 مساءً — العودة بين 7:00 و8:00 مساءً.'),
+    T('quran','دروس القرآن','16:00','18:00',[1,3],'mid','book','الخروج 4:00 مساءً — انتهاء الدرس 5:15 م — العودة حوالي 6:00 م.'),
+    T('studyTue','الواجبات والمراجعة','16:00','18:00',[2],'mid','book','وقت الواجبات قبل الجيم.'),
+    T('gym','الجيم','18:15','19:45',[1,2,3,6],'mid','gym','الخروج 6:15 مساءً بالدراجة (3 كم لكل اتجاه) — تدريب من ساعة إلى ساعة ونصف.'),
+    T('dinner','العشاء ووقت العائلة','20:00','20:45',[0,1,2,3,4,6],'low','home','بعد العودة من الأنشطة.'),
+    T('learn','وقت التعلم الشخصي','20:45','21:30',[0,1,2,3,4,6],'mid','target','المونتاج: DaVinci Resolve وPremiere Pro وAfter Effects أو أي مهارة أخرى.'),
+    T('winddown','التحضير للنوم','21:30','22:00',[0,1,2,3,4,6],'low','moon','نوم مبكر للاستيقاظ 5:00 صباحًا في أيام المدرسة.'),
+    // ── الجمعة: راحة ──
+    T('friWake','الاستيقاظ','06:00','06:30',[5],'low','sun','يوم راحة — استيقاظ متأخر.'),
+    T('friQuran','قراءة القرآن والأذكار','06:30','07:30',[5],'mid','book','جلسة قراءة هادئة.'),
+    T('friBreak','فطور متأخر ووقت حر','07:30','09:00',[5],'low','food',''),
+    T('friLearn','التعلم والتطوير','09:00','11:30',[5],'mid','target','وقت مركّز للتعلم (المونتاج أو غيره).'),
+    T('friPrayer','الاستعداد للجمعة وصلاة الجمعة','11:30','13:30',[5],'high','mosque','مع دخول وقت الظهر.'),
+    T('friLunch','الغداء والقيلولة','13:30','15:30',[5],'low','home',''),
+    T('friFree','وقت حر وأنشطة شخصية','15:30','17:00',[5],'low','star',''),
+    T('friWalk','المشي','17:00','18:00',[5],'low','compass','وقت للمشي والتنشيط.'),
+    T('friEvening','التعلم والقراءة','19:00','20:30',[5],'mid','book',''),
+    T('friReview','المراجعة الأسبوعية للإنجازات','20:30','21:30',[5],'mid','chart','مراجعة أداء الأسبوع: النسب والفوائت والتحسين.'),
+    T('friWind','التحضير للنوم','21:30','22:00',[5],'low','moon',''),
+    // ── السبت: إجازة ──
+    T('satWake','الاستيقاظ','06:30','07:00',[6],'low','sun','إجازة من المدرسة.'),
+    T('satQuran','قراءة القرآن والأذكار','07:00','08:00',[6],'mid','book',''),
+    T('satBreak','الفطور ووقت حر','08:00','09:00',[6],'low','food',''),
+    T('satLearn','وقت التعلم (المونتاج)','09:00','12:00',[6],'mid','target','DaVinci Resolve / Premiere Pro / After Effects.'),
+    T('satLunch','الغداء والراحة','12:00','14:00',[6],'low','home',''),
+    T('satFree','وقت حر وأنشطة شخصية','14:00','17:00',[6],'low','star','راحة وأنشطة يختارها أنت.'),
+    T('satStudy','واجبات ومراجعة','17:00','17:50',[6],'mid','book','جولة خفيفة على الواجبات قبل الجيم.'),
+    T('satPrep','التجهيز للجيم','17:50','18:10',[6],'low','gym','حتى الخروج 6:15 مساءً.')
+  ];
+}
+
+function defaultState(){
+  return {
+    version: APP_VERSION,
+    createdAt: new Date().toISOString(),
+    settings: {
+      theme: 'dark',
+      timeFormat: 'ar',                       // 'ar' ص/م | 'en' AM/PM | '24'
+      consequences: DEFAULT_CONSEQUENCES.slice(),
+      prayerManual: null                      // {date, times:{fajr..isha}} إدخال يدوي طارئ
+    },
+    templates: seedTemplates(),
+    days: {},                                 // 'YYYY-MM-DD' → {instances:[…]}
+    consequences: [],                         // العواقب المولدة
+    weight: {},                               // 'YYYY-MM-DD' → {kg, updatedAt}
+    learning: {
+      skills: ['DaVinci Resolve','Premiere Pro','After Effects'],
+      sessions: []                            // {id, date, skill, minutes, note}
+    },
+    prayer: null,                             // آخر جلب ناجح: {weekly:{date:{fajr..isha}}, fetchedAt, provider, manual:false}
+    lastActiveDate: todayStr()
+  };
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) { state = defaultState(); saveState(); return; }
+    const obj = JSON.parse(raw);
+    state = migrate(obj);
+  }catch(e){
+    console.error('loadState error', e);
+    state = defaultState(); saveState();
+  }
+}
+/* حماية من الحقول الناقصة عند الاستيراد أو نسخ قديمة */
+function migrate(o){
+  const d = defaultState();
+  if (!o || typeof o !== 'object') return d;
+  o.version = APP_VERSION;
+  o.settings  = Object.assign({}, d.settings, o.settings||{});
+  if (!Array.isArray(o.settings.consequences) || !o.settings.consequences.length) o.settings.consequences = d.settings.consequences.slice();
+  o.templates = Array.isArray(o.templates) && o.templates.length ? o.templates : d.templates;
+  o.days = (o.days && typeof o.days==='object') ? o.days : {};
+  o.consequences = Array.isArray(o.consequences) ? o.consequences : [];
+  o.weight = (o.weight && typeof o.weight==='object') ? o.weight : {};
+  o.learning = Object.assign({}, d.learning, o.learning||{});
+  if (!Array.isArray(o.learning.skills)) o.learning.skills = d.learning.skills.slice();
+  if (!Array.isArray(o.learning.sessions)) o.learning.sessions = [];
+  o.prayer = (o.prayer && typeof o.prayer==='object') ? o.prayer : null;
+  o.lastActiveDate = o.lastActiveDate || todayStr();
+  return o;
+}
+let saveTimer = null;
+function saveState(){
+  /* حفظ فوري عند كل تغيير — بدون زر حفظ */
+  try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){ console.error('saveState error', e); toast('تعذر الحفظ في المتصفح — تحقق من مساحة التخزين', 'bad'); }
+}
+
+/* ─────────── إنشاء مهام اليوم (بلا تكرار) ─────────── */
+function prayerTimesFor(dateStr){
+  /* مصدر واحد: المجلوب من موقع الأوائل، أو الإدخال اليدوي المعلَّم */
+  const manual = state.settings.prayerManual;
+  if (manual && manual.date === dateStr && manual.times) {
+    return Object.assign({}, manual.times, {__stale:false, __manual:true});
+  }
+  if (state.prayer && state.prayer.weekly && state.prayer.weekly[dateStr]) {
+    const t = state.prayer.weekly[dateStr];
+    const stale = state.prayer.fetchedFor !== dateStr;
+    return Object.assign({}, t, {__stale: stale, __manual:false});
+  }
+  return null;
+}
+function materializeFor(dateStr){
+  /* يبني قائمة مهام يوم معيّن من القوالب النشطة — دالة نقية بلا كتابة في الحالة */
+  const wd = weekdayOf(dateStr), out = [];
+  for (const t of state.templates){
+    if (t.active === false) continue;
+    const match = t.repeat === 'daily' ? true :
+                  t.repeat === 'weekly' ? Array.isArray(t.days) && t.days.includes(wd) :
+                  t.repeat === 'once' ? t.date === dateStr : false;
+    if (!match) continue;
+    let start = t.start, end = t.end;
+    if (t.linkedPrayer){
+      const p = prayerTimesFor(dateStr);
+      if (p && p[t.linkedPrayer]) { start = p[t.linkedPrayer]; end = minToHHMM(hhmmToMin(start) + 30); }
+    }
+    out.push({
+      iid: t.id + '@' + dateStr, tid: t.id, name: t.name, desc: t.desc || '',
+      start, end, priority: t.priority || 'mid', cat: t.cat || 'routine', icon: t.icon || 'clock',
+      linkedPrayer: t.linkedPrayer || null, override: false,
+      status: 'pending', completedAt: null, resolved: false, moved: false
+    });
+  }
+  out.sort((a,b)=> hhmmToMin(a.start) - hhmmToMin(b.start) || a.name.localeCompare(b.name,'ar'));
+  return out;
+}
+function ensureDay(dateStr){
+  /* يضمن وجود يوم معيّن — مرة واحدة فقط لكل تاريخ (لا تكرار للمهام عند إعادة الفتح) */
+  if (state.days[dateStr]) return false;
+  state.days[dateStr] = { instances: materializeFor(dateStr) };
+  return true;
+}
+function visibleInstances(dateStr){
+  const day = state.days[dateStr];
+  return day ? day.instances.filter(i=>!i.moved && !i.removed) : [];
+}
+function resyncFutureDays(){
+  /* بعد أي تعديل على القوالب: أعِد بناء مهام اليوم وما بعده من القوالب النشطة
+     مع الحفاظ التام على حالة كل مهمة قائمة (الحالة، الإنجاز، التعديلات اليدوية)
+     وعدم مسّ أيام الماضي نهائيًا (سجلات محفوظة). */
+  const today = todayStr();
+  let changed = false;
+  for (const ds of Object.keys(state.days)){
+    if (ds < today) continue;
+    const existing = state.days[ds].instances;
+    const fresh = materializeFor(ds);
+    const merged = [];
+    for (const f of fresh){
+      const old = existing.find(x=>x.iid===f.iid);
+      if (old) merged.push(Object.assign({}, f, {
+        status: old.status, completedAt: old.completedAt, resolved: old.resolved,
+        moved: old.moved, movedTo: old.movedTo, override: old.override, removed: old.removed,
+        name: old.override ? old.name : f.name,
+        desc: old.override ? old.desc : f.desc,
+        start: old.override ? old.start : f.start,
+        end: old.override ? old.end : f.end,
+        priority: old.override ? old.priority : f.priority,
+        linkedPrayer: old.override ? null : f.linkedPrayer
+      }));
+      else merged.push(f);
+    }
+    /* احتفظ بالسجلات المحسومة التي غادر قالبها (منجز/فائت/عذر) والمنقولة والمحذوفة من هذا اليوم */
+    for (const old of existing){
+      if (merged.some(m=>m.iid===old.iid)) continue;
+      if (old.moved || old.removed || (old.resolved && old.status !== 'pending')) merged.push(old);
+    }
+    merged.sort((a,b)=> hhmmToMin(a.start) - hhmmToMin(b.start));
+    if (merged.length !== existing.length || JSON.stringify(merged.map(m=>m.iid+':'+m.start+':'+m.name)) !== JSON.stringify(existing.map(m=>m.iid+':'+m.start+':'+m.name))) changed = true;
+    state.days[ds].instances = merged;
+  }
+  if (changed) updatePrayerTasks(today);
+  return changed;
+}
+function ensureToday(){
+  const today = todayStr();
+  let changed = false;
+  if (state.lastActiveDate !== today){
+    /* انتقلنا ليوم جديد: ختم أيام سابقة (بلا عواقب جديدة — منع المبالغة) ثم أنشئ اليوم */
+    finalizePastDays(today);
+    state.lastActiveDate = today;
+    changed = true;
+  }
+  if (ensureDay(today)) changed = true;
+  if (changed) saveState();
+  return changed;
+}
+function finalizePastDays(today){
+  /* المهام التي انتهت في أيام سابقة ولم تُحسم تُسجَّل "لم أنفذها" في السجل فقط */
+  for (const ds of Object.keys(state.days)){
+    if (ds >= today) continue;
+    for (const inst of state.days[ds].instances){
+      if (inst.moved || inst.removed) continue;
+      if (!inst.resolved && inst.status !== 'done' && inst.status !== 'excused'){
+        inst.status = 'missed'; inst.resolved = true;
+      }
+    }
+  }
+}
+</script>
+<script>
+/* ─────────── نظام الصلاة: الجلب من موقع الأوائل (مسقط) فقط ───────────
+   المصدر الإلزامي: https://www.al-awail.com/prayers/1776799_om_muscat-(مسقط).html
+   الموقع يحمي نفسه بتحقق JavaScript، لذا تُجرَّب وسائط عدة بالترتيب:
+     1) الجلب المباشر (إن سمح الموقع يومًا بـ CORS)
+     2) r.jina.ai — وسيط يعرض الصفحة بمتصفح حقيقي وينفّذ الجافاسكريبت
+     3) phantomjscloud — وسيط تصيير بنفس المبدأ (مُختبر ويعمل)
+     4) allorigins / codetabs — وسائط CORS بسيطة (إن اجتاز الموقع التحقق)
+   أي رد لا يحتوي مواقيت حقيقية يُرفض (بما فيه صفحات التحقق) — ولا تُعرض أبدًا مواقيت مُختلقة.
+   عند فشل كل الوسائط: تُعرض آخر مواقيت صحيحة محفوظة مع وسم «قديمة». */
+
+const PRAYER_URL = 'https://www.al-awail.com/prayers/1776799_om_muscat-(%D9%85%D8%B3%D9%82%D8%B7).html';
+const PRAYER_SOURCE_LABEL = 'al-awail.com — مسقط، سلطنة عُمان';
+const PRAYER_NAMES = {fajr:'الفجر', dhuhr:'الظهر', asr:'العصر', maghrib:'المغرب', isha:'العشاء'};
+const PRAYER_KEYS = ['fajr','dhuhr','asr','maghrib','isha'];
+const PRAYER_FETCH_URLS = [
+  {provider: 'مباشر',        url: PRAYER_URL},
+  {provider: 'r.jina.ai',    url: 'https://r.jina.ai/' + PRAYER_URL},
+  {provider: 'phantomjscloud', url: 'https://phantomjscloud.com/api/browser/v2/a-demo-key-with-low-quota-per-ip-address/?request=' +
+      encodeURIComponent(JSON.stringify({url: PRAYER_URL, renderType: 'html', renderTimeout: 45000}))},
+  {provider: 'allorigins',   url: 'https://api.allorigins.win/raw?url=' + encodeURIComponent(PRAYER_URL)},
+  {provider: 'codetabs',     url: 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(PRAYER_URL)}
+];
+let prayerStatus = {trying: false, lastError: null};
+
+function validHHMM(s){
+  const m = /^(\d{1,2}):(\d{2})$/.exec(s);
+  if (!m) return null;
+  const h = +m[1], mm = +m[2];
+  if (h > 23 || mm > 59) return null;
+  return pad2(h) + ':' + pad2(mm);
+}
+/* محلل الصفحة: يستخرج الجدول الأسبوعي (تاريخ → 6 مواقيت) + جدول اليوم احتياطًا */
+function parsePrayerText(raw){
+  if (!raw) return null;
+  const rawStr = String(raw);
+  if (rawStr.length < 200) return null;
+  /* صفحة التحقق لا تُقبل نجاحًا مهما بدت */
+  if (/being verified|One moment|لحظة واحدة/.test(rawStr) && !/202\d-\d{2}-\d{2}/.test(rawStr)) return null;
+
+  let text = rawStr;
+  if (/<[a-z][\s\S]*>/i.test(text)) {  // يبدو HTML → تجريد الوسوم
+    text = text.replace(/<script[\s\S]*?<\/script>/gi,' ').replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ');
+  }
+  text = text.replace(/&nbsp;|&amp;/g,' ').replace(/\s+/g,' ');
+
+  const weekly = {};
+  const T = '(\\d{1,2}:\\d{2})';
+  const rowRe = new RegExp('(\\d{4}-\\d{2}-\\d{2})\\D{0,70}?' + [T,T,T,T,T,T].join('\\D{0,70}?'), 'g');
+  let m;
+  while ((m = rowRe.exec(text)) !== null){
+    const times = m.slice(2, 8).map(validHHMM);
+    if (times.some(x => x === null)) continue;
+    const mins = times.map(hhmmToMin);
+    /* فحص منطقي: الفجر ≤ الشروق ≤ الظهر ≤ العصر ≤ المغرب ≤ العشاء */
+    let ok = true;
+    for (let i = 1; i < 6; i++) if (mins[i] < mins[i-1]) { ok = false; break; }
+    if (!ok) continue;
+    weekly[m[1]] = {fajr: times[0], shuruk: times[1], dhuhr: times[2], asr: times[3], maghrib: times[4], isha: times[5]};
+  }
+
+  /* احتياط: جدول اليوم فقط (تجاهل عدّاد الثواني HH:MM:SS عبر حدود الأرقام) */
+  const daily = {};
+  try {
+    const tTok = '(?<![\\d:])(\\d{1,2}:\\d{2})(?![\\d:])';
+    for (const key of ['fajr','shuruk','dhuhr','asr','maghrib','isha']){
+      const nm = {fajr:'الفجر',shuruk:'الشروق',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'}[key];
+      const re = new RegExp(nm + '[\\s\\S]{0,90}?' + tTok);
+      const mm = re.exec(text);
+      if (mm) { const v = validHHMM(mm[1]); if (v) daily[key] = v; }
+    }
+    if (PRAYER_KEYS.every(k => daily[k]) && !(daily.fajr <= daily.shuruk && daily.shuruk <= daily.dhuhr && daily.dhuhr <= daily.asr && daily.asr <= daily.maghrib && daily.maghrib <= daily.isha)) {
+      for (const k of Object.keys(daily)) delete daily[k];
+    }
+  } catch(e) { /* lookbehind غير مدعوم — الجدول الأسبوعي يكفي */ }
+
+  if (Object.keys(weekly).length === 0 && Object.keys(daily).length === 0) return null;
+  return {weekly, daily};
+}
+/* جلب + تحديث الحالة. force يتجاوز خانق التكرار (15 دقيقة) */
+async function fetchPrayers(force){
+  const today = todayStr();
+  if (!force && state.prayer && state.prayer.fetchedFor === today &&
+      (Date.now() - new Date(state.prayer.fetchedAt).getTime()) < 15*60*1000){
+    renderPrayerCards(); return true;
+  }
+  prayerStatus = {trying: true, lastError: null};
+  updatePrayerStatusUI();
+  for (const prov of PRAYER_FETCH_URLS){
+    try{
+      const ctrl = new AbortController();
+      const to = setTimeout(()=>ctrl.abort(), 30000);
+      const resp = await fetch(prov.url, {signal: ctrl.signal, redirect: 'follow'});
+      clearTimeout(to);
+      if (!resp.ok) { prayerStatus.lastError = prov.provider + ': HTTP ' + resp.status; continue; }
+      const body = await resp.text();
+      const parsed = parsePrayerText(body);
+      if (!parsed) { prayerStatus.lastError = prov.provider + ': رد غير صالح (تحقق أو صفحة فارغة)'; continue; }
+      /* يكفي أن يحتوي الرد تاريخ اليوم أو جدول أسبوعيًا مفيدًا */
+      const hasToday = parsed.weekly[today] || Object.keys(parsed.weekly).length > 0;
+      if (!hasToday) { prayerStatus.lastError = prov.provider + ': لا يوجد جدول مواقيت'; continue; }
+      state.prayer = {
+        weekly: parsed.weekly,
+        fetchedAt: new Date().toISOString(),
+        fetchedFor: today,
+        provider: prov.provider,
+        source: PRAYER_SOURCE_LABEL,
+        manual: false
+      };
+      saveState();
+      updatePrayerTasks(today);
+      ensureToday();
+      saveState();
+      prayerStatus = {trying: false, lastError: null};
+      renderPrayerCards(); renderAll();   // المهام المرتبطة بالصلوات تغيّرت مواعيدها
+      toast('تم جلب مواقيت الصلاة من موقع الأوائل — ' + prov.provider, 'ok');
+      return true;
+    }catch(e){
+      prayerStatus.lastError = prov.provider + ': ' + (e.name === 'AbortError' ? 'انتهت المدة' : (e.message||'فشل'));
+    }
+  }
+  prayerStatus.trying = false;
+  updatePrayerStatusUI(); renderPrayerCards();
+  toast('تعذر جلب المواقيت — تُعرض آخر مواقيت صحيحة محفوظة إن وُجدت', 'warn');
+  return false;
+}
+/* مواقيت يوم معيّن كما تُعرض: يدوي إن وُجد، وإلا الجلب الأقرب مع وسم القِدم */
+function getDayPrayers(dateStr){
+  const manual = state.settings.prayerManual;
+  if (manual && manual.date === dateStr && manual.times){
+    return Object.assign({}, manual.times, {__stale:false, __manual:true, __for:dateStr});
+  }
+  const p = state.prayer;
+  if (!p || !p.weekly) return null;
+  if (p.weekly[dateStr]) return Object.assign({}, p.weekly[dateStr], {__stale: p.fetchedFor !== dateStr, __manual:false, __for:dateStr});
+  /* لا مواقيت لهذا التاريخ تحديدًا → أقرب تاريخ سابق في آخر جلب (مع وسم قديم) */
+  const dates = Object.keys(p.weekly).sort();
+  const older = dates.filter(d => d <= dateStr).pop();
+  const pick = older || dates[0];
+  if (!pick) return null;
+  return Object.assign({}, p.weekly[pick], {__stale:true, __manual:false, __for:pick});
+}
+function nextPrayer(){
+  const now = nowMin(), today = todayStr();
+  const p = getDayPrayers(today);
+  if (p){
+    for (const k of PRAYER_KEYS){
+      const t = hhmmToMin(p[k]);
+      if (t > now) return {key:k, name:PRAYER_NAMES[k], hhmm:p[k], remain: t - now, date: today};
+    }
+  }
+  /* كل صلوات اليوم مضت → فجر الغد */
+  const pTm = getDayPrayers(addDays(today, 1));
+  if (pTm && pTm.fajr){
+    const t = hhmmToMin(pTm.fajr) + 1440;
+    return {key:'fajr', name:'الفجر (غدًا)', hhmm:pTm.fajr, remain: t - now, date: addDays(today,1)};
+  }
+  if (p){
+    const t = hhmmToMin(p.fajr) + 1440;
+    return {key:'fajr', name:'الفجر (غدًا)', hhmm:p.fajr, remain: t - now, date: addDays(today,1)};
+  }
+  return null;
+}
+/* تحديث مهام الصلوات المرتبطة عند تغيّر المواقيت (اليوم فقط — الأيام الماضية سجلات محفوظة) */
+function updatePrayerTasks(dateStr){
+  const day = state.days[dateStr];
+  if (!day) return;
+  const p = prayerTimesFor(dateStr);
+  if (!p) return;
+  let changed = false;
+  for (const inst of day.instances){
+    if (inst.linkedPrayer && !inst.override && p[inst.linkedPrayer]){
+      const s = p[inst.linkedPrayer], e = minToHHMM(hhmmToMin(s) + 30);
+      if (inst.start !== s || inst.end !== e){ inst.start = s; inst.end = e; changed = true; }
+    }
+  }
+  if (changed) day.instances.sort((a,b)=> hhmmToMin(a.start)-hhmmToMin(b.start));
+  return changed;
+}
+
+/* ─────────── عرض الصلاة ─────────── */
+function renderPrayerCards(){
+  const today = todayStr();
+  const p = getDayPrayers(today);
+  const box = $('#dash-prayers'); if (!box) return;
+  const np = nextPrayer();
+  if (!p){
+    box.innerHTML = '<div class="empty" style="grid-column:1/-1">' + icon('bell',22) +
+      '<br>لم تُجلب المواقيت بعد<br><span style="font-size:.78rem">سيُعاد المحاولة تلقائيًا — أو اضغط «تحديث المواقيت الآن» في الإعدادات</span></div>';
+  } else {
+    box.innerHTML = PRAYER_KEYS.map(k=>{
+      const isNext = np && np.key === k && np.date === today;
+      const passed = hhmmToMin(p[k]) < nowMin() && !isNext;
+      return '<div class="pray ' + (isNext?'next':'') + (passed?' passed':'') + '">' +
+        '<div class="nm">' + PRAYER_NAMES[k] + (p.__manual?' <span style="font-size:.62rem">يدوي</span>':'') + '</div>' +
+        '<div class="tm">' + tf(p[k]) + '</div></div>';
+    }).join('');
+  }
+  const npb = $('#dash-next-prayer');
+  npb.innerHTML = np
+    ? '<div class="kv"><span class="k">الصلاة القادمة</span><span class="v">' + np.name + ' — ' + tf(np.hhmm) + '</span></div>' +
+      '<div class="kv"><span class="k">الوقت المتبقي</span><span class="v" style="color:var(--accent)">' + fmtDur(np.remain) + '</span></div>'
+    : '';
+  const staleBadge = $('#prayer-stale-badge');
+  staleBadge.innerHTML = (p && p.__stale) ? '<span class="badge-stale">مواقيت قديمة</span>' : '';
+  /* ملاحظة المصدر وآخر تحديث */
+  let note = '';
+  if (p){
+    note = 'المصدر: <b>' + esc(PRAYER_SOURCE_LABEL) + '</b>';
+    if (p.__manual) note += ' — <b>إدخال يدوي</b> لهذا اليوم';
+    else {
+      const f = state.prayer ? state.prayer.fetchedAt : null;
+      if (f) note += ' — آخر تحديث: <b>' + fmtDate(p.__for) + ' الساعة ' + tf(pad2(new Date(f).getHours()) + ':' + pad2(new Date(f).getMinutes())) + '</b>';
+      if (p.__stale) note += '<br>⚠ هذه مواقيت من جلب سابق — تعذر الاتصال بالموقع لتحديث اليوم. أعد المحاولة عند توفر الإنترنت.';
+    }
+    note += '<br>' + esc(fmtHijri(new Date()));
+  } else {
+    note = 'المصدر المعتمد: <b>' + esc(PRAYER_SOURCE_LABEL) + '</b> — لم يتم أي جلب ناجح حتى الآن. لا تُعرض مواقيت مُقدَّرة أو ثابتة.';
+  }
+  $('#prayer-srcnote').innerHTML = note;
+}
+function updatePrayerStatusUI(){
+  const box = $('#prayer-settings-info'); if (!box) return;
+  const p = state.prayer;
+  let html = '';
+  if (prayerStatus.trying) html = '<div class="srcbox">' + icon('refresh',15) + ' جارٍ المحاولة من وسائط الجلب…</div>';
+  else if (p){
+    html = '<div class="srcbox">آخر جلب ناجح: <b>' + fmtDate(dstr(new Date(p.fetchedAt))) + ' — ' +
+      tf(pad2(new Date(p.fetchedAt).getHours()) + ':' + pad2(new Date(p.fetchedAt).getMinutes())) +
+      '</b><br>الوسيط: <b>' + esc(p.provider) + '</b> — المصدر: <b>' + esc(PRAYER_SOURCE_LABEL) + '</b>' +
+      '<br>الأيام المخزنة: ' + Object.keys(p.weekly||{}).sort().map(d=>esc(fmtDateShort(d))).join('، ') + '</div>';
+  } else {
+    html = '<div class="srcbox">لا يوجد جلب ناجح محفوظ بعد.</div>';
+  }
+  if (prayerStatus.lastError) html += '<div style="font-size:.75rem;color:var(--warn);margin-top:6px">آخر خطأ: ' + esc(prayerStatus.lastError) + '</div>';
+  box.innerHTML = html;
+  const manual = state.settings.prayerManual;
+  if (manual) {
+    html += '';
+    box.insertAdjacentHTML('beforeend', '<div style="font-size:.78rem;color:var(--gold);margin-top:6px">يوجد إدخال يدوي لتاريخ ' + esc(fmtDate(manual.date)) + ' — استخدم «استعادة الجلب التلقائي» لإلغائه.</div>');
+  }
+}
+/* نافذة الإدخال اليدوي */
+function openPrayerManualModal(){
+  $('#pf-date').value = todayStr();
+  const fields = $('#pf-fields');
+  fields.innerHTML = PRAYER_KEYS.map(k=>
+    '<div><label style="font-size:.8rem;color:var(--muted);display:block;margin-bottom:4px">' + PRAYER_NAMES[k] + '</label>' +
+    '<input type="time" id="pf-' + k + '"></div>').join('');
+  const p = getDayPrayers(todayStr());
+  if (p) PRAYER_KEYS.forEach(k=>{ $('#pf-'+k).value = p[k] || ''; });
+  openModal('ov-prayer');
+}
+function savePrayerManual(){
+  const date = $('#pf-date').value;
+  if (!date) { toast('اختر التاريخ أولًا', 'bad'); return; }
+  const times = {};
+  for (const k of PRAYER_KEYS){
+    const v = validHHMM($('#pf-'+k).value || '');
+    if (!v) { toast('أدخل وقت ' + PRAYER_NAMES[k] + ' بصيغة صحيحة', 'bad'); return; }
+    times[k] = v;
+  }
+  state.settings.prayerManual = {date, times};
+  saveState();
+  updatePrayerTasks(todayStr());
+  ensureToday(); saveState();
+  renderPrayerCards(); updatePrayerStatusUI(); renderToday(); renderDashboard();
+  closeModal('ov-prayer');
+  toast('حُفظ الإدخال اليدوي لمواقيت ' + fmtDate(date), 'ok');
+}
+</script>
+<script>
+/* ─────────── حالات المهام والأولويات ─────────── */
+const STATUS_META = {
+  pending:  {label:'لم أبدأ',    cls:'gray'},
+  progress: {label:'قيد التنفيذ', cls:'warn'},
+  done:     {label:'مكتملة',      cls:'ok'},
+  missed:   {label:'لم أنفذها',   cls:'bad'},
+  excused:  {label:'عذر مقبول',   cls:'info'}
+};
+const PRIORITY_META = {
+  high: {label:'عالية',   cls:'bad'},
+  mid:  {label:'متوسطة',  cls:'warn'},
+  low:  {label:'منخفضة',  cls:'gray'}
+};
+const CAT_META = {routine:'روتين أساسي', custom:'مهمة شخصية'};
+let viewDate = todayStr();
+
+/* تأكيد متعدد الخيارات: يعيد رقم الخيار المختار أو -1 */
+function confirmEx(title, body, buttons){
+  return new Promise(res=>{
+    $('#confirm-title').textContent = title;
+    $('#confirm-body').innerHTML = body;
+    const row = $('#ov-confirm .btnrow'); row.innerHTML = '';
+    buttons.forEach((b, i)=>{
+      const btn = document.createElement('button');
+      btn.className = 'btn ' + (b.cls||'ghost'); btn.textContent = b.label;
+      btn.onclick = ()=>{ $('#ov-confirm').classList.remove('open'); row.innerHTML=''; res(i); };
+      row.appendChild(btn);
+    });
+    $('#ov-confirm').classList.add('open');
+  });
+}
+
+/* ─────────── الإحصائيات ─────────── */
+function dayStats(dateStr){
+  const all = state.days[dateStr] ? state.days[dateStr].instances : [];
+  const s = {total:0, done:0, missed:0, excused:0, remaining:0, pct:0, moved:0};
+  for (const i of all){
+    if (i.moved) { s.moved++; continue; }
+    if (i.removed) continue;
+    s.total++;
+    if (i.status === 'done') s.done++;
+    else if (i.status === 'missed') s.missed++;
+    else if (i.status === 'excused') s.excused++;
+    else s.remaining++;
+  }
+  const denom = s.total - s.excused;
+  s.pct = denom > 0 ? Math.round((s.done / denom) * 100) : 0;
+  return s;
+}
+function weekStats(anchorStr){
+  const start = weekStartOf(anchorStr);
+  const days = [];
+  for (let i=0; i<7; i++) days.push(addDays(start, i));
+  let total=0, done=0, excused=0;
+  const perDay = days.map(ds=>{
+    const st = dayStats(ds);
+    total += st.total; done += st.done; excused += st.excused;
+    return {date: ds, pct: st.pct, done: st.done, total: st.total};
+  });
+  const denom = total - excused;
+  return {start, days, perDay, pct: denom>0 ? Math.round(done/denom*100) : 0, done, total};
+}
+function currentNextTask(dateStr, now){
+  const list = visibleInstances(dateStr);
+  let cur = null;
+  for (const i of list){
+    const s = hhmmToMin(i.start), e = hhmmToMin(i.end);
+    if (s <= now && now < e) { if (!cur || s > hhmmToMin(cur.start)) cur = i; }
+  }
+  let next = null;
+  for (const i of list){ const s = hhmmToMin(i.start); if (s > now && (!next || s < hhmmToMin(next.start))) next = i; }
+  return {cur, next};
+}
+
+/* ─────────── نظام العواقب التلقائي ─────────── */
+function pickConsequenceText(){
+  const list = state.settings.consequences.filter(x=>x && x.trim());
+  if (!list.length) return 'اكتب سبب عدم إنجاز المهمة وكيفية تجنّبه مستقبلًا.';
+  const count = state.consequences.length;
+  let idx = count % list.length;
+  const last = state.consequences.length ? state.consequences[state.consequences.length-1].text : null;
+  if (list[idx] === last && list.length > 1) idx = (idx+1) % list.length; // لا تكرار متتالٍ
+  return list[idx];
+}
+function genConsequence(dateStr, inst){
+  if (state.consequences.some(c => c.iid === inst.iid && c.status === 'pending')) return;
+  state.consequences.push({
+    id: uid(), date: dateStr, iid: inst.iid, tid: inst.tid,
+    taskName: inst.name, taskTime: inst.start + '-' + inst.end,
+    text: pickConsequenceText(), note: '',
+    status: 'pending', createdAt: new Date().toISOString(), resolvedAt: null
+  });
+  toast('تولّدت عاقبة بسيطة: ' + inst.name, 'warn');
+}
+function consequenceTick(){
+  /* يعمل على مهام اليوم فقط — الأيام الماضية تُختم في finalizePastDays بلا عواقب (منع المبالغة) */
+  const today = todayStr(), now = nowMin();
+  const day = state.days[today];
+  if (!day) return;
+  let changed = false;
+  for (const inst of day.instances){
+    if (inst.moved || inst.resolved) continue;
+    if (now >= hhmmToMin(inst.end)){
+      changed = true;
+      if (inst.status === 'done'){ inst.resolved = true; }
+      else if (inst.status === 'excused'){ inst.resolved = true; }
+      else {
+        inst.status = 'missed'; inst.resolved = true;
+        genConsequence(today, inst);
+      }
+    }
+  }
+  if (changed) saveState();
+}
+function resolveConsequence(id, note){
+  const c = state.consequences.find(x=>x.id===id); if (!c) return;
+  c.status = 'done'; c.resolvedAt = new Date().toISOString(); if (note !== undefined) c.note = note;
+  saveState(); renderConsequences(); renderDashboard(); updateBadges();
+  toast('أحسنت — عاقبة «' + c.taskName + '» نُفذت', 'ok');
+}
+async function cancelConsequence(id){
+  const c = state.consequences.find(x=>x.id===id); if (!c) return;
+  const choice = await confirmEx('إلغاء العاقبة',
+    'هل أُلغى الاستحقاق الخاص بمهمة «<b>' + esc(c.taskName) + '</b>»؟ اختر السبب:',
+    [{label:'تم إنجاز المهمة لاحقًا', cls:'ok'}, {label:'كان عذرًا مقبولًا', cls:''}, {label:'تراجع — إبقاؤها', cls:'ghost'}]);
+  if (choice === 0){ resolveConsequence(id); }
+  else if (choice === 1){
+    c.status = 'cancelled'; c.resolvedAt = new Date().toISOString(); c.note = (c.note?c.note+' — ':'') + 'عذر مقبول';
+    saveState(); renderConsequences(); renderDashboard(); updateBadges(); toast('أُلغيت العاقبة بسبب عذر مقبول', 'info');
+  }
+}
+function renderConsequences(){
+  const pend = state.consequences.filter(c=>c.status==='pending').sort((a,b)=> b.date.localeCompare(a.date) || a.createdAt.localeCompare(b.createdAt));
+  const done = state.consequences.filter(c=>c.status!=='pending').sort((a,b)=> (b.resolvedAt||b.createdAt).localeCompare(a.resolvedAt||a.createdAt));
+  const box = $('#cons-list');
+  if (!pend.length){
+    box.innerHTML = '<div class="card"><div class="empty">' + icon('check',24) + '<br>لا توجد عواقب مستحقة — كل المهام تحت السيطرة</div></div>';
+  } else {
+    box.innerHTML = pend.map(c=>`
+      <div class="crow">
+        <div class="ctask">${icon('bell',15)} ${esc(c.taskName)}</div>
+        <div class="cmeta">${esc(fmtDate(c.date))} • الموعد: <span style="direction:ltr">${esc(fmtTimeStr(c.taskTime.split('-')[0], state.settings.timeFormat))} — ${esc(fmtTimeStr(c.taskTime.split('-')[1], state.settings.timeFormat))}</span></div>
+        <div class="ctext">${icon('star',13)} ${esc(c.text)}</div>
+        ${c.note ? '<div class="noteout">ملاحظة: ' + esc(c.note) + '</div>' : ''}
+        <textarea class="cons-note" data-id="${c.id}" placeholder="مثال: سبب التأخر كان… وكيف أتجنبه لاحقًا؟">${esc(c.note)}</textarea>
+        <div class="btnrow" style="margin-top:8px">
+          <button class="btn ok sm" onclick="resolveWithNote('${c.id}')">${icon('check',13)} تم التنفيذ</button>
+          <button class="btn sm" onclick="moveInstanceFlow('${esc(c.date)}','${esc(c.iid)}')">${icon('move',13)} أعد جدولة المهمة</button>
+          <button class="btn ghost sm" style="color:var(--muted)" onclick="cancelConsequence('${c.id}')">${icon('x',13)} إلغاء العاقبة</button>
+        </div>
+      </div>`).join('');
+  }
+  const dbox = $('#cons-done-list');
+  dbox.innerHTML = done.length ? done.map(c=>`
+      <div class="crow resolved">
+        <div class="ctask">${esc(c.taskName)}</div>
+        <div class="cmeta">${esc(fmtDate(c.date))} — ${c.status==='done'?'نُفذت':'أُلغيت'} ${c.resolvedAt? 'في ' + esc(fmtDateShort(dstr(new Date(c.resolvedAt)))) : ''}</div>
+        <div class="ctext" style="background:var(--bg2);color:var(--muted)">${esc(c.text)}</div>
+        ${c.note ? '<div class="noteout">ملاحظة: ' + esc(c.note) + '</div>' : ''}
+      </div>`).join('') : '<div class="empty" style="padding:14px">لا يوجد سجل بعد</div>';
+}
+function resolveWithNote(id){
+  const el = document.querySelector('.cons-note[data-id="'+id+'"]');
+  resolveConsequence(id, el ? el.value.trim() : '');
+}
+
+/* ─────────── تغيير حالة مهمة ─────────── */
+function setStatus(dateStr, iid, status){
+  const day = state.days[dateStr]; if (!day) return;
+  const inst = day.instances.find(x=>x.iid===iid); if (!inst) return;
+  inst.status = status;
+  if (status === 'done'){
+    inst.resolved = true; inst.completedAt = new Date().toISOString();
+    toast('أُنجزت: ' + inst.name + ' — ' + tf(pad2(new Date().getHours()) + ':' + pad2(new Date().getMinutes())), 'ok');
+  } else if (status === 'excused'){
+    inst.resolved = true; inst.completedAt = null;
+    /* عذر مقبول → تُلغى أي عاقبة معلقة لهذه المهمة */
+    state.consequences.forEach(c=>{ if (c.iid===iid && c.status==='pending'){ c.status='cancelled'; c.resolvedAt=new Date().toISOString(); c.note=(c.note?c.note+' — ':'')+'عذر مقبول'; }});
+    toast('سُجل عذر مقبول: ' + inst.name + ' — لن تولد أي عاقبة', 'info');
+  } else if (status === 'missed'){
+    inst.resolved = true;
+    if (!state.consequences.some(c=>c.iid===iid && c.status==='pending')) genConsequence(dateStr, inst);
+  } else {
+    inst.resolved = false; inst.completedAt = null;
+  }
+  saveState();
+  renderToday(); renderDashboard(); renderConsequences(); updateBadges();
+}
+
+/* ─────────── عرض مهام اليوم ─────────── */
+function renderToday(){
+  const ds = viewDate, isToday = ds === todayStr();
+  $('#today-title').textContent = isToday ? 'مهام اليوم' : 'مهام ' + fmtDate(ds);
+  $('#today-sub').textContent = (isToday ? fmtDate(ds) : (ds < todayStr() ? 'يوم سابق — من السجل المحفوظ' : 'يوم قادم')) + ' • ' + esc(fmtHijri(parseD(ds)));
+  $('#today-date').value = ds;
+  const st = dayStats(ds);
+  $('#today-stats').innerHTML = [
+    ['الإجمالي', st.total, 'var(--text)'], ['مكتملة', st.done, 'var(--ok)'],
+    ['متبقية', st.remaining, 'var(--info)'], ['فائتة', st.missed, 'var(--bad)'],
+    ['عذر مقبول', st.excused, 'var(--gold)'], ['نسبة الإنجاز', st.pct + '%', 'var(--accent)']
+  ].map(x=>'<div class="st" style="flex:1"><b style="color:'+x[2]+'">'+x[1]+'</b><span>'+x[0]+'</span></div>').join('');
+  const day = state.days[ds];
+  const list = visibleInstances(ds);
+  const movedN = day ? day.instances.filter(i=>i.moved).length : 0;
+  const box = $('#today-list');
+  if (!list.length){
+    box.innerHTML = '<div class="empty">' + icon('dash',26) + '<br>' +
+      (day ? 'لا توجد مهام في هذا اليوم' : 'لم تُنشأ مهام هذا بعد — ستُنشأ تلقائيًا من الروتين عند وصول يومه، أو أضف مهمة الآن') + '</div>';
+  } else {
+    const now = nowMin();
+    box.innerHTML = list.map(inst=>renderTaskRow(inst, ds, now)).join('') +
+      (movedN ? '<div style="font-size:.76rem;color:var(--faint);padding:6px 4px">' + icon('move',12) + ' نُقلت ' + movedN + ' مهمة من هذا اليوم إلى يوم آخر.</div>' : '');
+  }
+}
+function renderTaskRow(inst, ds, now){
+  const sm = STATUS_META[inst.status], pm = PRIORITY_META[inst.priority] || PRIORITY_META.mid;
+  const isCur = hhmmToMin(inst.start) <= now && now < hhmmToMin(inst.end) && ds === todayStr();
+  const isPastEnd = now >= hhmmToMin(inst.end) && ds === todayStr();
+  const catTag = inst.cat === 'custom' ? '<span class="tag gd">شخصية</span>' : '';
+  const prayerTag = inst.linkedPrayer ? '<span class="tag gd">' + icon('mosque',11) + ' الأذان الفعلي</span>' : '';
+  const doneNote = inst.completedAt ? '<div class="completedAt">' + icon('check',11) + ' أُنجزت الساعة ' + tf(pad2(new Date(inst.completedAt).getHours())+':'+pad2(new Date(inst.completedAt).getMinutes())) + '</div>' : '';
+  const chips = Object.keys(STATUS_META).map(k=>
+    '<button class="schip ' + (k===inst.status?'sel ':'') + STATUS_META[k].cls + '" onclick="setStatus(\'' + ds + '\',\'' + inst.iid + '\',\'' + k + '\')">' + STATUS_META[k].label + '</button>').join('');
+  return `<div class="trow ${inst.status} ${isCur?'now':''}">
+    <div class="tico">${icon(inst.icon||'clock',17)}</div>
+    <div class="tbody">
+      <div class="tname">${esc(inst.name)}
+        <span class="tag ${pm.cls}">${pm.label}</span>${catTag}${prayerTag}
+        ${isCur?'<span class="tag info">الآن</span>':''}
+        ${inst.override?'<span class="tag gray">معدّلة لهذا اليوم</span>':''}
+        ${isPastEnd && inst.status==='done' ? '' : ''}
+      </div>
+      ${inst.desc ? '<div class="tdesc">' + esc(inst.desc) + '</div>' : ''}
+      <div class="ttime">
+        <span class="clock">${icon('clock',13)} ${tf(inst.start)} — ${tf(inst.end)}</span>
+        <span>${fmtDur(Math.max(0, hhmmToMin(inst.end)-hhmmToMin(inst.start)))}</span>
+        ${isPastEnd && inst.status!=='done' && inst.status!=='excused' ? '<span class="tag bad">انتهى موعدها</span>' : ''}
+      </div>
+      <div class="statusrow">${chips}</div>
+      ${doneNote}
+    </div>
+    <div class="tacts">
+      <button class="iconbtn" style="width:29px;height:29px" title="تعديل" onclick="editInstanceFlow('${ds}','${inst.iid}')">${icon('edit',14)}</button>
+      <button class="iconbtn" style="width:29px;height:29px" title="نقل ليوم آخر" onclick="moveInstanceFlow('${ds}','${inst.iid}')">${icon('move',14)}</button>
+      <button class="iconbtn" style="width:29px;height:29px;color:var(--bad)" title="حذف" onclick="deleteInstanceFlow('${ds}','${inst.iid}')">${icon('trash',14)}</button>
+    </div>
+  </div>`;
+}
+
+/* ─────────── عرض الأسبوع ─────────── */
+function renderWeek(){
+  const start = weekStartOf(todayStr());
+  $('#week-grid').innerHTML = Array.from({length:7}, (_,i)=>{
+    const ds = addDays(start, i), wd = weekdayOf(ds);
+    const items = materializeFor(ds);
+    const isToday = ds === todayStr();
+    return `<div class="daycard ${isToday?'today':''}">
+      <h4>${WEEK_AR[wd]} ${isToday?'<span class="tag">اليوم</span>':''}<span class="date">${fmtDateShort(ds)}</span></h4>
+      ${items.length ? items.map(it=>`<div class="wevent"><span class="t">${tf(it.start)}</span><span class="n">${esc(it.name)}${it.icon==='mosque'?' '+icon('mosque',10):''}</span></div>`).join('')
+        : '<div class="empty" style="padding:10px;font-size:.78rem">راحة</div>'}
+    </div>`;
+  }).join('');
+}
+
+/* ─────────── نافذة المهمة (إضافة/تعديل) ─────────── */
+let taskModalCtx = null; // {mode:'new'|'edit-template'|'edit-instance', templateId?, dateStr?, iid?}
+function buildDayChecks(selected){
+  return WEEK_AR.map((nm,i)=>'<label><input type="checkbox" value="'+i+'" '+(selected.includes(i)?'checked':'')+'>' + nm.slice(0,4) + '</label>').join('');
+}
+function openTaskModal(ctx){
+  taskModalCtx = ctx;
+  const isEdit = ctx.mode !== 'new';
+  $('#task-modal-title').firstChild.textContent = ctx.mode==='new' ? 'إضافة مهمة جديدة ' : 'تعديل المهمة ';
+  $('#btn-task-save').textContent = ctx.mode==='new' ? 'إضافة المهمة' : 'حفظ التعديل';
+  $('#tf-days-row').style.display = 'none';
+  $('#tf-date-row').style.display = 'none';
+  $('#tf-active-row').style.display = isEdit ? '' : 'none';
+  $('#tf-scope-row').style.display = 'none';
+
+  let t = null, inst = null;
+  if (ctx.mode === 'edit-template') t = state.templates.find(x=>x.id===ctx.templateId);
+  if (ctx.mode === 'edit-instance'){
+    const day = state.days[ctx.dateStr];
+    inst = day && day.instances.find(x=>x.iid===ctx.iid);
+    if (!inst) return;
+    t = state.templates.find(x=>x.id===inst.tid);
+  }
+  const fill = (name, desc, start, end, prio, repeat, date, days, active) => {
+    $('#tf-name').value = name||''; $('#tf-desc').value = desc||'';
+    $('#tf-start').value = start||''; $('#tf-end').value = end||'';
+    $('#tf-priority').value = prio||'mid';
+    $('#tf-repeat').value = repeat||'once'; $('#tf-date').value = date||'';
+    $('#tf-days').innerHTML = buildDayChecks(days||[]);
+    $('#tf-active').checked = active !== false;
+    onRepeatChange();
+  };
+  if (ctx.mode === 'new'){
+    fill('', '', '', '', 'mid', 'once', ctx.newFor || todayStr(), [], true);
+  } else if (ctx.mode === 'edit-template'){
+    fill(t.name, t.desc, t.start, t.end, t.priority, t.repeat, t.date, t.days, t.active);
+  } else {
+    fill(inst.name, inst.desc, inst.start, inst.end, inst.priority,
+         t ? (t.repeat==='once'?'once':t.repeat) : 'once',
+         t && t.repeat==='once' ? t.date : ctx.dateStr,
+         t && Array.isArray(t.days) ? t.days : [], inst.override ? true : (t ? t.active!==false : true));
+    const editable = t && (t.repeat==='weekly' || t.repeat==='daily') && !inst.override;
+    $('#tf-scope-row').style.display = editable ? '' : 'none';
+    if (editable) $('#tf-scope').value = 'all';
+  }
+  openModal('ov-task');
+}
+function onRepeatChange(){
+  const r = $('#tf-repeat').value;
+  $('#tf-date-row').style.display = r==='once' ? '' : 'none';
+  $('#tf-days-row').style.display = r==='weekly' ? '' : 'none';
+}
+function submitTaskModal(){
+  const name = $('#tf-name').value.trim();
+  const start = $('#tf-start').value, end = $('#tf-end').value;
+  if (!name) { toast('اكتب اسم المهمة', 'bad'); return; }
+  if (!start || !end) { toast('حدد وقتي البداية والنهاية', 'bad'); return; }
+  if (hhmmToMin(end) <= hhmmToMin(start)) { toast('وقت النهاية يجب أن يكون بعد وقت البداية', 'bad'); return; }
+  const prio = $('#tf-priority').value, repeat = $('#tf-repeat').value;
+  const active = $('#tf-active').checked;
+  const days = $$('#tf-days input:checked').map(x=>+x.value);
+  if (repeat==='weekly' && !days.length){ toast('اختر يوم التكرار واحدًا على الأقل', 'bad'); return; }
+  if (repeat==='once' && !$('#tf-date').value){ toast('اختر تاريخ المهمة', 'bad'); return; }
+  const date = repeat==='once' ? $('#tf-date').value : null;
+  const desc = $('#tf-desc').value.trim();
+  const ctx = taskModalCtx;
+
+  if (ctx.mode === 'new'){
+    state.templates.push({
+      id: uid(), name, desc, start, end, priority: prio, cat: 'custom', icon: 'star',
+      repeat, date, days: repeat==='weekly'?days:null, active: true, linkedPrayer: null
+    });
+    if (repeat==='once' && date) ensureDay(date);
+    ensureDay(todayStr());
+    resyncFutureDays();
+    toast('أُضيفت المهمة: ' + name, 'ok');
+  }
+  else if (ctx.mode === 'edit-template'){
+    const t = state.templates.find(x=>x.id===ctx.templateId); if (!t) return;
+    Object.assign(t, {name, desc, start, end, priority: prio, repeat, date, days: repeat==='weekly'?days:t.days, active});
+    applyTemplateToFuture(t);
+    toast('حُفظ تعديل «' + name + '» — الأيام القادمة ستتبع التعديل', 'ok');
+  }
+  else { // edit-instance
+    const scope = $('#tf-scope-row').style.display !== 'none' ? $('#tf-scope').value : 'one';
+    const day = state.days[ctx.dateStr];
+    const inst = day && day.instances.find(x=>x.iid===ctx.iid);
+    if (!inst) return;
+    const t = state.templates.find(x=>x.id===inst.tid);
+    if (scope === 'all' && t && !inst.override){
+      Object.assign(t, {name, desc, start, end, priority: prio, active});
+      applyTemplateToFuture(t);
+      toast('حُفظ التعديل على كل الأيام القادمة', 'ok');
+    } else {
+      Object.assign(inst, {name, desc, start, end, priority: prio, override: true});
+      /* إن كانت نابعة من قالب صلاة: فك الربط حتى لا يلغي التحديث التلقائي التعديل اليدوي */
+      if (inst.linkedPrayer) inst.linkedPrayer = null;
+      toast('حُفظ التعديل على هذا اليوم فقط', 'ok');
+    }
+  }
+  saveState();
+  closeModal('ov-task');
+  renderAll(); updateBadges();
+}
+/* انسخ تعديل القالب إلى مهام اليوم وما بعده عبر المزامنة (السجلات الماضية لا تُمس) */
+function applyTemplateToFuture(t){
+  resyncFutureDays();
+}
+
+/* ─────────── تعديل / حذف / نقل من واجهة اليوم ─────────── */
+function editInstanceFlow(ds, iid){ openTaskModal({mode:'edit-instance', dateStr: ds, iid}); }
+function moveInstanceFlow(ds, iid){
+  const day = state.days[ds]; const inst = day && day.instances.find(x=>x.iid===iid);
+  if (!inst) return;
+  $('#move-task-info').innerHTML = 'المهمة: <b>' + esc(inst.name) + '</b> — الموعد الحالي: <span style="direction:ltr">' + tf(inst.start) + ' — ' + tf(inst.end) + '</span> (' + esc(fmtDate(ds)) + ')';
+  $('#move-date').value = addDays(ds, 1);
+  $('#move-date').dataset.src = ds; $('#move-date').dataset.iid = iid;
+  openModal('ov-move');
+}
+function submitMove(){
+  const target = $('#move-date').value, src = $('#move-date').dataset.src, iid = $('#move-date').dataset.iid;
+  if (!target){ toast('اختر التاريخ الجديد', 'bad'); return; }
+  const day = state.days[src]; const inst = day && day.instances.find(x=>x.iid===iid);
+  if (!inst) return;
+  inst.moved = true; inst.movedTo = target; inst.resolved = true;
+  state.templates.push({
+    id: uid(), name: inst.name, desc: inst.desc, start: inst.start, end: inst.end,
+    priority: inst.priority, cat: inst.cat, icon: inst.icon,
+    repeat: 'once', date: target, days: null, active: true, linkedPrayer: null
+  });
+  ensureDay(target);
+  resyncFutureDays();
+  saveState(); closeModal('ov-move');
+  renderAll(); updateBadges();
+  toast('نُقلت «' + inst.name + '» إلى ' + fmtDate(target), 'ok');
+}
+async function deleteInstanceFlow(ds, iid){
+  const day = state.days[ds]; const inst = day && day.instances.find(x=>x.iid===iid);
+  if (!inst) return;
+  const t = state.templates.find(x=>x.id===inst.tid);
+  const recurring = t && (t.repeat==='daily' || (t.repeat==='weekly' && Array.isArray(t.days)));
+  if (recurring && !inst.override){
+    const choice = await confirmEx('حذف المهمة', '«<b>' + esc(inst.name) + '</b>» مهمة متكررة. كيف تريد حذفها؟<br><span style="font-size:.78rem">سجلات الأيام الماضية تبقى محفوظة في كل الحالات.</span>',
+      [{label:'هذا اليوم فقط', cls:''}, {label:'حذف نهائي لكل الأيام', cls:'bad'}, {label:'إلغاء', cls:'ghost'}]);
+    if (choice === 0){
+      /* حذف من هذا اليوم فقط: علم removed يمنع العودة عند أي مزامنة، مع بقاء الأيام الأخرى */
+      inst.removed = true; inst.resolved = true;
+      saveState(); renderAll(); updateBadges(); toast('حُذفت من هذا اليوم فقط', 'ok');
+    } else if (choice === 1){
+      await deleteTemplateFlow(t.id);
+    }
+  } else {
+    const ok = await confirmBox('حذف المهمة', 'هل تحذف «<b>' + esc(inst.name) + '</b>»؟ لا تولد عاقبة عن مهمة محذوفة، والسجلات الماضية تبقى محفوظة.', 'حذف');
+    if (!ok) return;
+    inst.removed = true; inst.resolved = true;
+    if (t && t.repeat==='once') state.templates = state.templates.filter(x=>x.id!==t.id);
+    resyncFutureDays();
+    saveState(); renderAll(); updateBadges(); toast('حُذفت المهمة', 'ok');
+  }
+}
+async function deleteTemplateFlow(tid){
+  const t = state.templates.find(x=>x.id===tid); if (!t) return;
+  const ok = await confirmBox('حذف نهائي', 'يحذف «<b>' + esc(t.name) + '</b>» من كل الأيام القادمة.<br>سجلات الأيام الماضية تبقى كما هي ولا تُمس.', 'حذف نهائي');
+  if (!ok) return;
+  state.templates = state.templates.filter(x=>x.id!==tid);
+  resyncFutureDays();
+  saveState(); renderAll(); updateBadges(); toast('حُذفت المهمة نهائيًا من الأيام القادمة', 'ok');
+}
+</script>
+<script>
+/* ─────────── أدوات الرسوم البيانية (Canvas خالص — بلا مكتبات خارجية) ─────────── */
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888'; }
+function chartSetup(canvas){
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth || canvas.parentElement.clientWidth || 320;
+  const h = canvas.clientHeight || 240;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  ctx.font = '11px Tajawal, sans-serif';
+  return {ctx, w, h};
+}
+function chartEmpty(canvas, msg){
+  const {ctx, w, h} = chartSetup(canvas);
+  ctx.fillStyle = cssVar('--faint'); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(msg || 'لا توجد بيانات بعد', w/2, h/2);
+}
+function drawLineChart(canvas, labels, values, opts){
+  opts = opts || {};
+  const pts = values.map((v,i)=>({v, l: labels[i]})).filter(p => p.v !== null && p.v !== undefined);
+  if (pts.length < 2){ chartEmpty(canvas, opts.emptyMsg || 'لا توجد قراءات كافية بعد'); return; }
+  const {ctx, w, h} = chartSetup(canvas);
+  const padL = 38, padR = 12, padT = 16, padB = 26;
+  const iw = w - padL - padR, ih = h - padT - padB;
+  let mn = Math.min(...pts.map(p=>p.v)), mx = Math.max(...pts.map(p=>p.v));
+  if (mn === mx){ mn -= 1; mx += 1; }
+  const range = mx - mn; mn -= range * 0.12; mx += range * 0.12;
+  const X = i => padL + (iw * i) / (pts.length - 1);
+  const Y = v => padT + ih - ((v - mn) / (mx - mn)) * ih;
+  ctx.strokeStyle = cssVar('--border'); ctx.fillStyle = cssVar('--faint');
+  ctx.lineWidth = 1;
+  for (let g = 0; g <= 3; g++){
+    const y = padT + (ih * g) / 3;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+    const val = mx - ((mx - mn) * g) / 3;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText((opts.decimals? val.toFixed(opts.decimals) : Math.round(val)) + (opts.unit||''), 2, y);
+  }
+  /* المساحة */
+  const grad = ctx.createLinearGradient(0, padT, 0, padT + ih);
+  grad.addColorStop(0, cssVar('--accent-soft')); grad.addColorStop(1, 'transparent');
+  ctx.beginPath(); ctx.moveTo(X(0), Y(pts[0].v));
+  pts.forEach((p,i)=>ctx.lineTo(X(i), Y(p.v)));
+  ctx.lineTo(X(pts.length-1), padT+ih); ctx.lineTo(X(0), padT+ih); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+  /* الخط */
+  ctx.beginPath(); ctx.moveTo(X(0), Y(pts[0].v));
+  pts.forEach((p,i)=>ctx.lineTo(X(i), Y(p.v)));
+  ctx.strokeStyle = cssVar('--accent'); ctx.lineWidth = 2.4; ctx.lineJoin = 'round'; ctx.stroke();
+  /* النقاط */
+  pts.forEach((p,i)=>{
+    ctx.beginPath(); ctx.arc(X(i), Y(p.v), 3.4, 0, 7);
+    ctx.fillStyle = cssVar('--accent'); ctx.fill();
+    ctx.strokeStyle = cssVar('--card'); ctx.lineWidth = 1.4; ctx.stroke();
+  });
+  /* تسميات المحور (أقصى ~7) */
+  const stepN = Math.max(1, Math.ceil(pts.length / 7));
+  ctx.fillStyle = cssVar('--muted'); ctx.textBaseline = 'top';
+  pts.forEach((p,i)=>{ if (i % stepN === 0 || i === pts.length-1){
+    ctx.textAlign = 'center';
+    ctx.fillText(p.l, X(i), padT + ih + 6);
+  }});
+}
+function drawBarChart(canvas, labels, values, opts){
+  opts = opts || {};
+  if (!values.length || values.every(v => !v)){ chartEmpty(canvas, opts.emptyMsg || 'لا توجد بيانات بعد'); return; }
+  const {ctx, w, h} = chartSetup(canvas);
+  const padT = 18, padB = 26, padX = 10;
+  const iw = w - padX*2, ih = h - padT - padB;
+  const mx = opts.maxVal || Math.max(100, Math.max(...values));
+  const n = values.length;
+  const slot = iw / n, bw = Math.min(46, slot * 0.62);
+  ctx.strokeStyle = cssVar('--border');
+  for (let g = 0; g <= 2; g++){
+    const y = padT + (ih * g) / 2;
+    ctx.beginPath(); ctx.moveTo(padX, y); ctx.lineTo(w-padX, y); ctx.stroke();
+  }
+  values.forEach((v, i)=>{
+    const bh = (v / mx) * ih;
+    const x = padX + slot * i + (slot - bw) / 2;
+    const y = padT + ih - bh;
+    ctx.beginPath();
+    const r = Math.min(6, bw/2, bh);
+    ctx.moveTo(x, y + r); ctx.arcTo(x, y, x + r, y, r); ctx.lineTo(x + bw - r, y);
+    ctx.arcTo(x + bw, y, x + bw, y + r, r); ctx.lineTo(x + bw, padT + ih); ctx.lineTo(x, padT + ih);
+    ctx.closePath();
+    ctx.fillStyle = cssVar('--accent-soft'); ctx.fill();
+    ctx.strokeStyle = cssVar('--accent'); ctx.lineWidth = 1.6; ctx.stroke();
+    ctx.fillStyle = cssVar('--text'); ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    if (v) ctx.fillText(Math.round(v * 10) / 10 + (opts.unit||''), x + bw/2, y - 3);
+    ctx.fillStyle = cssVar('--muted'); ctx.textBaseline = 'top';
+    ctx.fillText(labels[i], x + bw/2, padT + ih + 6);
+  });
+}
+
+/* ─────────── لوحة التحكم ─────────── */
+const RING_C = 2 * Math.PI * 41;
+function renderDashboard(){
+  const today = todayStr(), now = nowMin();
+  /* المهمة الحالية والتالية */
+  const {cur, next} = currentNextTask(today, now);
+  const curBox = $('#dash-current-task'), nxtBox = $('#dash-next-task');
+  curBox.innerHTML = cur
+    ? '<div class="kv"><span class="k">المهمة الحالية</span><span class="v">' + icon(cur.icon,13) + ' ' + esc(cur.name) + '</span></div>' +
+      '<div class="kv"><span class="k">تختم عند</span><span class="v">' + tf(cur.end) + ' — باقٍ ' + fmtDur(hhmmToMin(cur.end) - now) + '</span></div>'
+    : '<div class="kv"><span class="k">المهمة الحالية</span><span class="v" style="color:var(--faint)">لا شيء جارٍ الآن</span></div>';
+  nxtBox.innerHTML = next
+    ? '<div class="kv"><span class="k">المهمة التالية</span><span class="v">' + icon(next.icon,13) + ' ' + esc(next.name) + '</span></div>' +
+      '<div class="kv"><span class="k">تبدأ عند</span><span class="v">' + tf(next.start) + ' — متبقٍ ' + fmtDur(hhmmToMin(next.start) - now) + '</span></div>'
+    : '<div class="kv"><span class="k">المهمة التالية</span><span class="v" style="color:var(--faint)">لا مهام متبقية اليوم</span></div>';
+
+  /* نسبة الإنجاز */
+  const st = dayStats(today);
+  $('#day-pct').textContent = st.pct + '%';
+  $('#ring-arc').setAttribute('stroke-dasharray', (st.pct / 100 * RING_C) + ' 999');
+  $('#st-done').textContent = st.done;
+  $('#st-rem').textContent = st.remaining;
+  $('#st-miss').textContent = st.missed;
+
+  /* العواقب */
+  const cons = state.consequences.filter(c=>c.status==='pending');
+  $('#dash-cons-count').innerHTML = cons.length ? '<span class="tag bad">' + cons.length + '</span>' : '<span class="tag ok">صفر</span>';
+  $('#dash-cons-list').innerHTML = cons.length
+    ? cons.slice(0,3).map(c=>'<div class="kv"><span class="k" style="flex:1">' + icon('bell',12) + ' ' + esc(c.taskName) + '</span><span class="v" style="font-size:.76rem;color:var(--warn)">' + esc(c.text.slice(0,38)) + '…</span></div>').join('') +
+      (cons.length > 3 ? '<div style="font-size:.78rem;margin-top:6px"><a href="#" onclick="switchTab(\'consequences\');return false">عرض كل العواقب (' + cons.length + ') ←</a></div>' : '')
+    : '<div class="empty" style="padding:14px">' + icon('check',20) + '<br>لا عواقب مستحقة</div>';
+
+  /* الوزن */
+  const wd = Object.keys(state.weight).sort();
+  const lastD = wd[wd.length-1];
+  $('#dash-weight').innerHTML = lastD
+    ? '<div class="kv"><span class="k">آخر قراءة مسجلة</span><span class="v" style="direction:ltr">' + state.weight[lastD].kg.toFixed(1) + ' kg</span></div>' +
+      '<div class="kv"><span class="k">تاريخها</span><span class="v">' + fmtDate(lastD) + '</span></div>' +
+      '<div style="font-size:.75rem;color:var(--faint);margin-top:6px"><a href="#" onclick="switchTab(\'weight\');return false">فتح سجل الوزن ←</a> (اختياري تمامًا)</div>'
+    : '<div class="empty" style="padding:14px">' + icon('scale',20) + '<br>لا قراءات بعد — التسجيل اختياري<br><a href="#" onclick="openWeightModal();return false" style="font-size:.8rem">تسجيل قراءة الآن ←</a></div>';
+
+  /* ملخص الأسبوع */
+  const ws = weekStats(today);
+  $('#dash-week').innerHTML =
+    '<div class="kv"><span class="k">نسبة إنجاز الأسبوع</span><span class="v" style="color:var(--accent)">' + ws.pct + '%</span></div>' +
+    '<div class="kv"><span class="k">مهام أُنجزت هذا الأسبوع</span><span class="v">' + ws.done + ' من ' + ws.total + '</span></div>' +
+    '<div style="display:flex;gap:5px;align-items:flex-end;height:64px;margin-top:10px">' +
+    ws.perDay.map((d,i)=>{
+      const hh = Math.max(4, d.pct);
+      return '<div style="flex:1;text-align:center" title="' + esc(fmtDate(d.date)) + ' — ' + d.pct + '%">' +
+        '<div style="background:' + (d.date===today?'var(--accent)':'var(--accent-soft)') + ';border:1px solid var(--accent);border-radius:5px;height:' + hh + '%"></div>' +
+        '<div style="font-size:.62rem;color:var(--faint);margin-top:3px">' + WEEK_MIN[i] + '</div></div>';
+    }).join('') + '</div>';
+}
+function updateBadges(){
+  const n = state.consequences.filter(c=>c.status==='pending').length;
+  $('#badge-cons').textContent = n > 0 ? n : '';
+  $('#dash-cons-count').innerHTML = n ? '<span class="tag bad">' + n + '</span>' : '<span class="tag ok">صفر</span>';
+}
+
+/* ─────────── سجل الوزن ─────────── */
+let weightRange = 90; // آخر N يوم للرسم (أو 0 = الكل)
+function renderWeight(){
+  /* أزرار المدى */
+  $('#weight-range-btns').innerHTML = [[30,'30 يومًا'],[90,'90 يومًا'],[365,'سنة'],[0,'الكل']]
+    .map(r=>'<button class="btn sm ' + (weightRange===r[0]?'primary':'ghost') + '" onclick="setWeightRange(' + r[0] + ')">' + r[1] + '</button>').join('');
+  /* الجدول */
+  const entries = Object.keys(state.weight).sort().reverse();
+  const tbl = $('#weight-table');
+  if (!entries.length){
+    tbl.innerHTML = '<tr><td><div class="empty">' + icon('scale',24) + '<br>لا توجد قياسات بعد — التسجيل اختياري تمامًا وتستطيع تخطي أي يوم</div></td></tr>';
+  } else {
+    tbl.innerHTML = '<tr><th>التاريخ</th><th>الوزن (كجم)</th><th>آخر تعديل</th><th></th></tr>' +
+      entries.map(d=>{
+        const w = state.weight[d];
+        return '<tr><td>' + esc(fmtDate(d)) + '</td><td class="tdclock">' + w.kg.toFixed(1) + '</td>' +
+          '<td style="font-size:.75rem;color:var(--muted)">' + esc(fmtDateShort(dstr(new Date(w.updatedAt)))) + '</td>' +
+          '<td style="text-align:end;white-space:nowrap">' +
+          '<button class="iconbtn" style="width:28px;height:28px;display:inline-grid" title="تعديل" onclick="openWeightModal(\'' + d + '\')">' + icon('edit',13) + '</button> ' +
+          '<button class="iconbtn" style="width:28px;height:28px;display:inline-grid;color:var(--bad)" title="حذف" onclick="deleteWeight(\'' + d + '\')">' + icon('trash',13) + '</button></td></tr>';
+      }).join('');
+  }
+  drawWeightChart();
+}
+function setWeightRange(r){ weightRange = r; renderWeight(); }
+function drawWeightChart(){
+  const canvas = $('#weight-chart');
+  const all = Object.keys(state.weight).sort().map(d=>({d, kg: state.weight[d].kg}));
+  let pts = all;
+  if (weightRange > 0){
+    const from = addDays(todayStr(), -weightRange);
+    pts = all.filter(x=>x.d >= from);
+  }
+  if (pts.length < 2){ chartEmpty(canvas, pts.length ? 'قراءة واحدة فقط — سجّل يومًا آخر ليظهر المنحنى' : 'لا توجد قراءات بعد'); return; }
+  drawLineChart(canvas,
+    pts.map(p=>fmtDateShort(p.d)),
+    pts.map(p=>p.kg),
+    {unit: '', decimals: 1, emptyMsg: 'لا توجد قراءات كافية'});
+}
+function openWeightModal(dateStr, kg){
+  $('#wf-date').value = dateStr || todayStr();
+  $('#wf-kg').value = (kg !== undefined ? kg : (dateStr ? state.weight[dateStr]?.kg : ''));
+  $('#wf-date').dataset.editing = dateStr || '';
+  $('#ov-weight h3').firstChild.textContent = dateStr ? 'تعديل قراءة الوزن ' : 'تسجيل الوزن ';
+  openModal('ov-weight');
+}
+function saveWeight(){
+  const d = $('#wf-date').value || todayStr();
+  const kg = parseFloat($('#wf-kg').value);
+  if (!kg || kg < 20 || kg > 400){ toast('أدخل وزنًا صحيحًا بين 20 و400 كجم', 'bad'); return; }
+  state.weight[d] = {kg: Math.round(kg*10)/10, updatedAt: new Date().toISOString()};
+  saveState(); closeModal('ov-weight');
+  renderWeight(); renderDashboard();
+  toast('سُجّل الوزن في ' + fmtDate(d) + ' — ' + kg.toFixed(1) + ' كجم', 'ok');
+}
+async function deleteWeight(d){
+  const ok = await confirmBox('حذف قراءة', 'تحذف قراءة ' + fmtDate(d) + '؟ لا يمكن التراجع (يمكن استعادتها من نسخة احتياطية إن وُجدت).', 'حذف');
+  if (!ok) return;
+  delete state.weight[d];
+  saveState(); renderWeight(); renderDashboard(); toast('حُذفت القراءة', 'ok');
+}
+function weightPeriodAverage(){
+  const from = $('#weight-avg-from').value, to = $('#weight-avg-to').value;
+  const out = $('#weight-avg-out');
+  if (!from || !to || from > to){ toast('اختر فترة صحيحة (من → إلى)', 'bad'); return; }
+  const vals = Object.keys(state.weight).filter(d=>d>=from && d<=to).map(d=>state.weight[d].kg);
+  if (!vals.length){ out.textContent = ''; out.style.color = 'var(--muted)'; toast('لا توجد قراءات داخل هذه الفترة', 'info'); return; }
+  const avg = vals.reduce((a,b)=>a+b,0) / vals.length;
+  out.textContent = 'متوسط ' + vals.length + ' قراءة: ' + avg.toFixed(1) + ' كجم';
+  out.style.color = 'var(--accent)';
+}
+</script>
+<script>
+/* ─────────── السجل والتقارير ─────────── */
+let heatMonth = todayStr().slice(0,7);   // YYYY-MM
+let heatSelected = todayStr();
+function renderReports(){
+  renderHeatmap();
+  renderDayDetail(heatSelected);
+  /* آخر 8 أسابيع */
+  const wkStart = weekStartOf(todayStr());
+  const labels = [], vals = [];
+  for (let i=7; i>=0; i--){
+    const ws0 = addDays(wkStart, -7*i);
+    const ws = weekStats(ws0);
+    labels.push(fmtDateShort(ws0));
+    vals.push(ws.pct);
+  }
+  drawBarChart($('#chart-weekly'), labels, vals, {maxVal:100, unit:'%', emptyMsg:'لا توجد بيانات أسابيع بعد'});
+  /* شهريًا هذا العام */
+  const year = todayStr().slice(0,4);
+  const mLabels = [], mVals = [];
+  for (let m=1; m<=12; m++){
+    const ym = year + '-' + pad2(m);
+    let done = 0;
+    for (const ds of Object.keys(state.days)){
+      if (!ds.startsWith(ym)) continue;
+      done += dayStats(ds).done;
+    }
+    mLabels.push(MONTHS_AR[m-1].slice(0,4)); mVals.push(done);
+  }
+  drawBarChart($('#chart-monthly'), mLabels, mVals, {unit:'', emptyMsg:'لا توجد مهام منجزة هذا العام بعد'});
+  /* أفضل الأيام (بحد أدنى 3 مهام ليكون القياس معنويًا) */
+  const ranked = Object.keys(state.days).map(ds=>({ds, st: dayStats(ds)}))
+    .filter(x=>x.st.total >= 3 && x.st.done > 0)
+    .sort((a,b)=> b.st.pct - a.st.pct || b.st.done - a.st.done).slice(0,5);
+  $('#best-days').innerHTML = ranked.length
+    ? ranked.map((x,i)=>'<div class="kv"><span class="k">' + (i+1) + '. ' + fmtDate(x.ds) + '</span><span class="v" style="color:var(--accent)">' + x.st.pct + '% — ' + x.st.done + '/' + x.st.total + '</span></div>').join('')
+      + '<div style="font-size:.74rem;color:var(--faint);margin-top:6px">الترتيب حسب نسبة الإنجاز في الأيام التي بها 3 مهام فأكثر.</div>'
+    : '<div class="empty" style="padding:16px">لا بيانات كافية بعد — تُعرض أفضل أيامك هنا مع تراكم السجل</div>';
+  /* إحصائيات الشهر الحالي */
+  const ym = todayStr().slice(0,7);
+  const mDays = Object.keys(state.days).filter(ds=>ds.startsWith(ym));
+  let mDone=0, mMissed=0, mTotal=0, mPctSum=0, mActive=0;
+  for (const ds of mDays){
+    const st = dayStats(ds);
+    mDone += st.done; mMissed += st.missed; mTotal += st.total;
+    if (st.total > 0){ mPctSum += st.pct; mActive++; }
+  }
+  $('#month-stats').innerHTML = mTotal
+    ? '<div class="kv"><span class="k">مهام أُنجزت خلال ' + monthLabel(ym) + '</span><span class="v" style="color:var(--ok)">' + mDone + '</span></div>' +
+      '<div class="kv"><span class="k">مهام فائتة</span><span class="v" style="color:var(--bad)">' + mMissed + '</span></div>' +
+      '<div class="kv"><span class="k">أيام فيها سجل</span><span class="v">' + mActive + '</span></div>' +
+      '<div class="kv"><span class="k">متوسط نسبة الإنجاز</span><span class="v" style="color:var(--accent)">' + (mActive ? Math.round(mPctSum/mActive) : 0) + '%</span></div>'
+    : '<div class="empty" style="padding:16px">لا يوجد سجل لهذا الشهر بعد</div>';
+}
+function renderHeatmap(){
+  $('#heat-label').textContent = monthLabel(heatMonth);
+  const [y, m] = heatMonth.split('-').map(Number);
+  const first = new Date(y, m-1, 1);
+  const daysIn = new Date(y, m, 0).getDate();
+  const offset = first.getDay(); // 0=الأحد يطابق عمود RTL الأول
+  let html = WEEK_MIN.map(w=>'<div class="wd">' + w + '</div>').join('');
+  for (let i=0; i<offset; i++) html += '<div class="hcell out"></div>';
+  const today = todayStr();
+  for (let d=1; d<=daysIn; d++){
+    const ds = y + '-' + pad2(m) + '-' + pad2(d);
+    const st = dayStats(ds);
+    const alpha = st.total ? (0.12 + 0.75 * (st.done / Math.max(1, st.total))) : 0;
+    const bg = st.total ? 'background:rgba(45,212,191,' + alpha.toFixed(2) + ')' : '';
+    const title = st.total ? fmtDate(ds) + ' — ' + st.pct + '% (' + st.done + '/' + st.total + ')' : fmtDate(ds) + ' — لا مهام';
+    html += '<div class="hcell ' + (ds===heatSelected?'sel':'') + '" style="' + bg + '" title="' + esc(title) + '" onclick="selectDay(\'' + ds + '\')">' + d + '</div>';
+  }
+  $('#heat-cal').innerHTML = html;
+  $('#heat-legend-box').innerHTML =
+    '<div style="font-weight:700;margin-bottom:8px">التقويم يوضح مستوى الالتزام اليومي</div>' +
+    '<div class="leg"><i style="background:rgba(45,212,191,.87)"></i> إنجاز كامل تقريبًا</div>' +
+    '<div class="leg"><i style="background:rgba(45,212,191,.45)"></i> إنجاز متوسط</div>' +
+    '<div class="leg"><i style="background:rgba(45,212,191,.12)"></i> إنجاز ضعيف</div>' +
+    '<div class="leg"><i style="background:var(--bg2);border:1px solid var(--border)"></i> لا مهام / لا سجل</div>' +
+    '<div style="font-size:.78rem;color:var(--faint);margin-top:10px;line-height:1.8">اضغط أي يوم لعرض ما حدث فيه بالتفصيل. السجلات القديمة لا تُحذف عند انتقال الأيام.</div>';
+}
+function heatShift(n){
+  const [y,m] = heatMonth.split('-').map(Number);
+  const d = new Date(y, m-1+n, 1);
+  heatMonth = d.getFullYear() + '-' + pad2(d.getMonth()+1);
+  renderHeatmap();
+}
+function selectDay(ds){ heatSelected = ds; renderHeatmap(); renderDayDetail(ds); }
+function renderDayDetail(ds){
+  const box = $('#day-detail');
+  const day = state.days[ds];
+  const st = dayStats(ds);
+  const wEntry = state.weight[ds];
+  const cons = state.consequences.filter(c=>c.date===ds);
+  let rows = '';
+  if (day){
+    rows = visibleInstances(ds).map(inst=>{
+      const sm = STATUS_META[inst.status];
+      return '<div class="wevent" style="padding:7px 0;border-bottom:1px dashed var(--border);display:flex;gap:9px;align-items:center;flex-wrap:wrap">' +
+        '<span class="t" style="direction:ltr;font-weight:700;font-size:.78rem">' + tf(inst.start) + '—' + tf(inst.end) + '</span>' +
+        '<span style="flex:1">' + icon(inst.icon,13) + ' ' + esc(inst.name) + '</span>' +
+        '<button class="schip sel ' + sm.cls + '" onclick="setStatus(\'' + ds + '\',\'' + inst.iid + '\',\'' + inst.status + '\')">' + sm.label + '</button>' +
+        (inst.completedAt ? '<span style="font-size:.7rem;color:var(--faint)">أُنجزت ' + tf(pad2(new Date(inst.completedAt).getHours())+':'+pad2(new Date(inst.completedAt).getMinutes())) + '</span>' : '') +
+        '</div>';
+    }).join('');
+  }
+  box.innerHTML = '<div class="card">' +
+    '<h3>' + icon('calendar',15) + ' تفاصيل ' + fmtDate(ds) + (ds===todayStr()?' <span class="tag">اليوم</span>':'') +
+    '<span class="spacer"><span class="tag ' + (st.pct>=70?'ok':st.pct>=40?'warn':'bad') + '">' + st.pct + '% إنجاز</span></span></h3>' +
+    '<div class="statline" style="margin:0 0 12px">' +
+      '<div class="st"><b>' + st.total + '</b><span>المهام</span></div>' +
+      '<div class="st"><b style="color:var(--ok)">' + st.done + '</b><span>مكتملة</span></div>' +
+      '<div class="st"><b style="color:var(--bad)">' + st.missed + '</b><span>فائتة</span></div>' +
+      '<div class="st"><b style="color:var(--gold)">' + st.excused + '</b><span>عذر</span></div>' +
+    '</div>' +
+    (rows ? rows : '<div class="empty" style="padding:14px">لا توجد مهام مسجلة في هذا اليوم</div>') +
+    (wEntry ? '<div class="kv" style="margin-top:10px"><span class="k">وزن هذا اليوم (اختياري)</span><span class="v" style="direction:ltr">' + wEntry.kg.toFixed(1) + ' kg</span></div>' : '') +
+    (cons.length ? '<div style="margin-top:10px;font-size:.82rem;color:var(--warn)">' + icon('bell',13) + ' عواقب هذا اليوم: ' + cons.map(c=>esc(c.taskName)).join('، ') + '</div>' : '') +
+    '</div>';
+}
+
+/* ─────────── التعلم والتطوير ─────────── */
+function renderLearning(){
+  /* المهارات */
+  $('#skills-list').innerHTML = state.learning.skills.map(s=>
+    '<span class="skilltag">' + esc(s) + '<button title="حذف المهارة" onclick="deleteSkill(\'' + esc(s).replace(/'/g,"\\'") + '\')">' + icon('x',11) + '</button></span>').join('')
+    || '<div class="empty" style="padding:10px">لا مهارات — أضف مهارتك الأولى</div>';
+  /* الرسم: آخر 8 أسابيع بالساعات */
+  const wkStart = weekStartOf(todayStr());
+  const labels = [], vals = [];
+  for (let i=7; i>=0; i--){
+    const ws0 = addDays(wkStart, -7*i), we0 = addDays(ws0, 6);
+    const mins = state.learning.sessions.filter(s=>s.date>=ws0 && s.date<=we0).reduce((a,s)=>a+s.minutes,0);
+    labels.push(fmtDateShort(ws0)); vals.push(Math.round(mins/6)/10);
+  }
+  drawBarChart($('#chart-learning'), labels, vals, {unit:' س', emptyMsg:'لا جلسات تعلم بعد — سجّل أول جلسة'});
+  /* الإجماليات */
+  const weekM = weekMinutes(), monthM = monthMinutes(), allM = state.learning.sessions.reduce((a,s)=>a+s.minutes,0);
+  $('#learn-totals').innerHTML = [
+    ['هذا الأسبوع', fmtDur(weekM), 'var(--accent)'],
+    ['هذا الشهر', fmtDur(monthM), 'var(--info)'],
+    ['الإجمالي الكلي', fmtDur(allM), 'var(--text)'],
+    ['عدد الجلسات', state.learning.sessions.length, 'var(--gold)']
+  ].map(x=>'<div class="st" style="flex:1"><b style="color:'+x[2]+';font-size:1.05rem">' + x[1] + '</b><span>' + x[0] + '</span></div>').join('');
+  /* الجدول */
+  const sess = state.learning.sessions.slice().sort((a,b)=> b.date.localeCompare(a.date) || b.id.localeCompare(a.id)).slice(0,40);
+  $('#learn-table').innerHTML = sess.length
+    ? '<tr><th>التاريخ</th><th>المهارة</th><th>المدة</th><th>ما أنجزته</th><th></th></tr>' +
+      sess.map(s=>'<tr><td>' + esc(fmtDateShort(s.date)) + '</td><td>' + esc(s.skill) + '</td>' +
+        '<td class="tdclock">' + fmtDur(s.minutes) + '</td><td style="color:var(--muted);font-size:.82rem">' + esc(s.note||'—') + '</td>' +
+        '<td style="text-align:end"><button class="iconbtn" style="width:28px;height:28px;display:inline-grid;color:var(--bad)" title="حذف" onclick="deleteSession(\'' + s.id + '\')">' + icon('trash',13) + '</button></td></tr>').join('')
+    : '<tr><td><div class="empty">' + icon('book',22) + '<br>لا جلسات بعد — ابدأ بتسجيل جلسة تعلم (المونتاج: DaVinci Resolve، Premiere Pro، After Effects…)</div></td></tr>';
+}
+function weekMinutes(){
+  const ws = weekStartOf(todayStr()), we = addDays(ws, 6);
+  return state.learning.sessions.filter(s=>s.date>=ws && s.date<=we).reduce((a,s)=>a+s.minutes,0);
+}
+function monthMinutes(){
+  const ym = todayStr().slice(0,7);
+  return state.learning.sessions.filter(s=>s.date.startsWith(ym)).reduce((a,s)=>a+s.minutes,0);
+}
+function addSkill(){
+  const v = $('#new-skill').value.trim();
+  if (!v) return;
+  if (state.learning.skills.includes(v)){ toast('المهارة موجودة بالفعل', 'info'); return; }
+  state.learning.skills.push(v);
+  saveState(); $('#new-skill').value = '';
+  renderLearning(); toast('أُضيفت مهارة: ' + v, 'ok');
+}
+async function deleteSkill(name){
+  const used = state.learning.sessions.filter(s=>s.skill===name).length;
+  const ok = await confirmBox('حذف مهارة', 'تحذف مهارة «<b>' + esc(name) + '</b>» من القائمة؟' +
+    (used ? '<br><span style="font-size:.8rem">جلساتها السابقة (' + used + ') تبقى في السجل بأسمائها.</span>' : ''), 'حذف');
+  if (!ok) return;
+  state.learning.skills = state.learning.skills.filter(s=>s!==name);
+  saveState(); renderLearning(); toast('حُذفت المهارة من القائمة', 'ok');
+}
+function openLearnModal(){
+  $('#lf-date').value = todayStr();
+  $('#lf-skill').innerHTML = state.learning.skills.map(s=>'<option>' + esc(s) + '</option>').join('') || '<option value="">— أضف مهارة أولًا —</option>';
+  $('#lf-min').value = ''; $('#lf-note').value = '';
+  openModal('ov-learn');
+}
+function saveLearnSession(){
+  const date = $('#lf-date').value || todayStr();
+  const skill = $('#lf-skill').value;
+  const minutes = parseInt($('#lf-min').value, 10);
+  const note = $('#lf-note').value.trim();
+  if (!skill){ toast('أضف مهارة أولًا', 'bad'); return; }
+  if (!minutes || minutes < 1 || minutes > 720){ toast('أدخل مدة الجلسة بالدقائق (1–720)', 'bad'); return; }
+  state.learning.sessions.push({id: uid(), date, skill, minutes, note});
+  saveState(); closeModal('ov-learn');
+  renderLearning(); renderDashboard();
+  toast('سُجّلت جلسة ' + fmtDur(minutes) + ' في «' + skill + '»', 'ok');
+}
+async function deleteSession(id){
+  const s = state.learning.sessions.find(x=>x.id===id); if (!s) return;
+  const ok = await confirmBox('حذف جلسة', 'تحذف جلسة «' + esc(s.skill) + '» بتاريخ ' + fmtDate(s.date) + '؟', 'حذف');
+  if (!ok) return;
+  state.learning.sessions = state.learning.sessions.filter(x=>x.id!==id);
+  saveState(); renderLearning(); toast('حُذفت الجلسة', 'ok');
+}
+</script>
+<script>
+/* ─────────── الإعدادات ─────────── */
+function applyTheme(){
+  document.documentElement.dataset.theme = state.settings.theme;
+  $('#btn-theme').innerHTML = icon(state.settings.theme === 'dark' ? 'sun' : 'moon', 17);
+  $('#set-theme-dark').className = 'btn sm ' + (state.settings.theme==='dark'?'primary':'ghost');
+  $('#set-theme-light').className = 'btn sm ' + (state.settings.theme==='light'?'primary':'ghost');
+}
+function setTheme(t){ state.settings.theme = t; saveState(); applyTheme(); renderAll(); }
+function setTimeFormat(v){
+  state.settings.timeFormat = v; saveState();
+  $('#fmt-demo').textContent = '5:05 → ' + fmtTimeStr('05:05', v) + ' و18:40 → ' + fmtTimeStr('18:40', v);
+  renderAll(); clockTick(true);
+}
+function renderSettings(){
+  $('#set-timeformat').value = state.settings.timeFormat;
+  $('#fmt-demo').textContent = '5:05 → ' + fmtTimeStr('05:05', state.settings.timeFormat) + ' و18:40 → ' + fmtTimeStr('18:40', state.settings.timeFormat);
+  $('#set-cons').value = state.settings.consequences.join('\n');
+  updatePrayerStatusUI();
+  renderTaskManager();
+}
+function renderTaskManager(){
+  const rep = t => t.repeat==='daily' ? 'يوميًا'
+    : t.repeat==='weekly' ? (t.days||[]).slice().sort().map(d=>WEEK_MIN[d]).join('، ')
+    : 'مرة — ' + fmtDateShort(t.date||todayStr());
+  $('#task-manager').innerHTML = state.templates.map(t=>{
+    const on = t.active !== false;
+    return '<div class="trow" style="padding:8px 10px;margin-bottom:7px;' + (on?'':'opacity:.5') + '">' +
+      '<div class="tico" style="width:28px;height:28px">' + icon(t.icon||'clock',14) + '</div>' +
+      '<div class="tbody"><div class="tname" style="font-size:.88rem">' + esc(t.name) +
+      (t.cat==='routine'?' <span class="tag gray">روتين</span>':' <span class="tag gd">شخصية</span>') +
+      (!on?' <span class="tag bad">التكرار موقوف</span>':'') + '</div>' +
+      '<div class="ttime" style="margin-top:2px"><span class="clock">' + tf(t.start) + ' — ' + tf(t.end) + '</span><span>' + rep(t) + '</span></div></div>' +
+      '<div class="tacts" style="flex-direction:row">' +
+      '<button class="iconbtn" style="width:29px;height:29px" title="' + (on?'إيقاف التكرار':'تفعيل التكرار') + '" onclick="toggleTemplateActive(\'' + t.id + '\')">' + icon(on?'pause':'play',13) + '</button>' +
+      '<button class="iconbtn" style="width:29px;height:29px" title="تعديل" onclick="openTaskModal({mode:\'edit-template\', templateId:\'' + t.id + '\'})">' + icon('edit',13) + '</button>' +
+      '<button class="iconbtn" style="width:29px;height:29px;color:var(--bad)" title="حذف نهائي" onclick="deleteTemplateFlow(\'' + t.id + '\')">' + icon('trash',13) + '</button></div></div>';
+  }).join('');
+}
+async function toggleTemplateActive(tid){
+  const t = state.templates.find(x=>x.id===tid); if (!t) return;
+  const on = t.active !== false;
+  const ok = await confirmBox(on ? 'إيقاف التكرار' : 'تفعيل التكرار',
+    on ? 'يُوقف ظهور «<b>' + esc(t.name) + '</b>» في الأيام القادمة.<br>سجلاتها السابقة واليوم تبقى كما هي ولا تُحذف.'
+       : 'يعود ظهور «<b>' + esc(t.name) + '</b>» في أيامها القادمة.',
+    on ? 'إيقاف' : 'تفعيل');
+  if (!ok) return;
+  t.active = !on;
+  applyTemplateToFuture(t);
+  saveState(); renderTaskManager(); renderToday(); renderWeek(); renderDashboard();
+  toast(on ? 'أُوقف تكرار «' + t.name + '» — سجلاتها محفوظة' : 'أُعيد تفعيل «' + t.name + '»', 'ok');
+}
+function saveConsequencesList(){
+  const lines = $('#set-cons').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  if (!lines.length){ toast('أدخل عاقبة واحدة على الأقل', 'bad'); return; }
+  state.settings.consequences = lines;
+  saveState();
+  toast('حُفظت قائمة العواقب (' + lines.length + ' عاقبة)', 'ok');
+}
+
+/* ─────────── النسخ الاحتياطي: تصدير / استيراد / إعادة ضبط ─────────── */
+function exportData(){
+  const payload = Object.assign({}, state, {
+    app: 'daily-life-dashboard', version: APP_VERSION, exportedAt: new Date().toISOString()
+  });
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'daily-dashboard-backup-' + todayStr() + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  toast('صُدّرت نسخة احتياطية كاملة — احفظها في مكان آمن', 'ok');
+}
+function importDataFile(file){
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    try{
+      const obj = JSON.parse(reader.result);
+      /* التأكد من صحة الملف قبل أي استبدال */
+      if (!obj || typeof obj !== 'object' || !Array.isArray(obj.templates) || typeof obj.days !== 'object' || !obj.settings){
+        toast('الملف غير صالح — ليس نسخة احتياطية من هذا التطبيق', 'bad'); return;
+      }
+      const counts = 'المهام: ' + obj.templates.length + ' • الأيام المسجلة: ' + Object.keys(obj.days).length +
+        ' • قراءات الوزن: ' + Object.keys(obj.weight||{}).length + ' • جلسات التعلم: ' + (obj.learning?.sessions?.length || 0);
+      const ok = await confirmBox('استيراد نسخة احتياطية',
+        'سيُستبدل <b>كل</b> المحتوى الحالي بمحتوى الملف.<br><span style="font-size:.82rem">' + counts + '</span><br><br>تأكد أنك صدّرت نسخة من البيانات الحالية إن احتجتها.', 'استبدال البيانات');
+      if (!ok) return;
+      state = migrate(obj);
+      saveState();
+      applyTheme();
+      ensureToday();
+      renderAll(); updateBadges(); clockTick(true);
+      fetchPrayers(true);
+      toast('استُوردت النسخة الاحتياطية بنجاح', 'ok');
+    }catch(e){
+      toast('فشل الاستيراد: ملف غير صالح أو تالف', 'bad');
+    }
+  };
+  reader.readAsText(file);
+}
+async function resetAll(){
+  const txt = $('#reset-confirm').value.trim();
+  if (txt !== 'إعادة ضبط'){ toast('اكتب كلمة «إعادة ضبط» أولًا للتأكيد', 'warn'); return; }
+  const ok = await confirmBox('إعادة الضبط النهائية',
+    'سيُحذف <b>كل شيء</b> نهائيًا: المهام، السجلات، الوزن، التعلم، الإعدادات والمواقيت المخزنة.<br>لا يمكن التراجع — تأكد من تصدير نسخة احتياطية أولًا.', 'نعم، احذف كل شيء');
+  if (!ok) return;
+  localStorage.removeItem(LS_KEY);
+  location.reload();
+}
+
+/* ─────────── التبويبات والعرض ─────────── */
+let currentTab = 'dashboard';
+function switchTab(name){
+  currentTab = name;
+  $$('.tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+  $$('.view').forEach(v=>v.classList.toggle('active', v.id==='view-'+name));
+  const R = {
+    dashboard: ()=>{ renderDashboard(); renderPrayerCards(); },
+    today: renderToday, week: renderWeek, consequences: renderConsequences,
+    weight: renderWeight, reports: renderReports, learning: renderLearning, settings: renderSettings
+  };
+  (R[name] || (()=>{}))();
+}
+function renderAll(){
+  renderDashboard(); renderPrayerCards(); renderToday(); renderWeek();
+  renderConsequences(); renderWeight(); renderReports(); renderLearning(); renderSettings();
+}
+
+/* ─────────── الساعة والمحرك ─────────── */
+function clockTick(force){
+  const d = new Date();
+  const hm = fmtTimeStr(pad2(d.getHours())+':'+pad2(d.getMinutes()), state.settings.timeFormat);
+  $('#clock-time').textContent = hm;
+  $('#clock-date').textContent = fmtDate(dstr(d));
+  $('#dash-clock').textContent = hm;
+  $('#dash-date').textContent = fmtDate(dstr(d)) + (fmtHijri(d) ? ' • ' + fmtHijri(d) : '');
+  if (currentTab === 'dashboard') renderDashboard();
+  if (force) { renderPrayerCards(); renderToday(); }
+}
+function engineTick(){
+  const rollover = ensureToday();
+  consequenceTick();
+  updateBadges();
+  if (rollover){
+    renderAll(); updateBadges();
+    fetchPrayers();   // يوم جديد → مواقيت جديدة
+    toast('بدأ يوم جديد — أُنشئت مهام اليوم وتجددت المواقيت تلقائيًا', 'info');
+  } else {
+    if (currentTab === 'dashboard') renderDashboard();
+    if (currentTab === 'today') renderToday();
+  }
+}
+
+/* ─────────── التهيئة وربط الأحداث ─────────── */
+const HEADING_ICONS = {
+  'logo-ic':'dash','ic-now':'clock','ic-progress':'chart','ic-pray':'mosque','ic-cons':'bell',
+  'ic-weight':'scale','ic-weeksum':'calendar','ic-wchart':'chart','ic-wtable':'scale',
+  'ic-wchart2':'chart','ic-mchart':'chart','ic-best':'star','ic-monstat':'chart',
+  'ic-skill':'star','ic-hours':'chart','ic-summ':'chart','ic-sess':'note',
+  'ic-look':'gear','ic-prayset':'mosque','ic-consset':'bell','ic-taskset':'dash',
+  'ic-data':'download','ic-about':'note','ic-move':'move','ic-wmodal':'scale','ic-lmodal':'book','ic-pmodal':'mosque'
+};
+function bindEvents(){
+  Object.entries(HEADING_ICONS).forEach(([id, ic])=>{
+    const el = document.getElementById(id);
+    if (el) el.insertAdjacentHTML('afterbegin', icon(ic, 15) + ' ');
+  });
+  $('#btn-add-task').innerHTML = icon('plus',15) + ' إضافة مهمة';
+  $('#btn-weight-add').innerHTML = icon('plus',15) + ' تسجيل وزن';
+  $('#btn-learn-add').innerHTML = icon('plus',15) + ' جلسة تعلم';
+  $('#btn-task-new').innerHTML = icon('plus',15) + ' إضافة مهمة جديدة';
+
+  $$('.tab').forEach(b=>b.onclick = ()=>switchTab(b.dataset.tab));
+  $('#btn-theme').onclick = ()=>setTheme(state.settings.theme==='dark'?'light':'dark');
+  $('#set-theme-dark').onclick = ()=>setTheme('dark');
+  $('#set-theme-light').onclick = ()=>setTheme('light');
+  $('#set-timeformat').onchange = e=>setTimeFormat(e.target.value);
+  $('#btn-cons-save').onclick = saveConsequencesList;
+  $('#btn-export').onclick = exportData;
+  $('#btn-import').onclick = ()=>$('#import-file').click();
+  $('#import-file').onchange = e=>{ if (e.target.files[0]) importDataFile(e.target.files[0]); e.target.value=''; };
+  $('#reset-confirm').oninput = e=>{ $('#btn-reset').disabled = e.target.value.trim() !== 'إعادة ضبط'; };
+  $('#btn-reset').onclick = resetAll;
+
+  $('#btn-add-task').onclick = ()=>openTaskModal({mode:'new', newFor: viewDate});
+  $('#btn-task-new').onclick = ()=>openTaskModal({mode:'new', newFor: viewDate});
+  $('#tf-repeat').onchange = onRepeatChange;
+  $('#btn-task-save').onclick = submitTaskModal;
+  $('#btn-move-save').onclick = submitMove;
+  $('#btn-day-prev').onclick = ()=>{ viewDate = addDays(viewDate,-1); renderToday(); };
+  $('#btn-day-next').onclick = ()=>{ viewDate = addDays(viewDate,1); renderToday(); };
+  $('#btn-day-today').onclick = ()=>{ viewDate = todayStr(); renderToday(); };
+  $('#today-date').onchange = e=>{ if (e.target.value){ viewDate = e.target.value; renderToday(); } };
+
+  $('#btn-weight-add').onclick = ()=>openWeightModal();
+  $('#btn-weight-save').onclick = saveWeight;
+  $('#btn-weight-avg').onclick = weightPeriodAverage;
+  $('#btn-learn-add').onclick = openLearnModal;
+  $('#btn-learn-save').onclick = saveLearnSession;
+  $('#btn-skill-add').onclick = addSkill;
+  $('#new-skill').onkeydown = e=>{ if (e.key==='Enter') addSkill(); };
+
+  $('#btn-prayer-fetch').onclick = ()=>fetchPrayers(true);
+  $('#btn-prayer-manual').onclick = openPrayerManualModal;
+  $('#btn-prayer-manual-save').onclick = savePrayerManual;
+  $('#btn-prayer-auto').onclick = async ()=>{
+    if (!state.settings.prayerManual){ toast('لا يوجد إدخال يدوي حاليًا — المصدر هو الجلب التلقائي', 'info'); return; }
+    const ok = await confirmBox('استعادة الجلب التلقائي', 'يُلغى الإدخال اليدوي وتعود المواقيت لما جُلب من موقع الأوائل.', 'استعادة');
+    if (!ok) return;
+    state.settings.prayerManual = null;
+    saveState(); updatePrayerTasks(todayStr()); ensureToday(); saveState();
+    renderPrayerCards(); updatePrayerStatusUI(); renderToday(); renderDashboard();
+    toast('عاد الجلب التلقائي من موقع الأوائل', 'ok');
+  };
+
+  /* إغلاق النوافذ */
+  $$('[data-close]').forEach(b=>b.onclick = ()=>closeModal(b.dataset.close));
+  $$('.overlay').forEach(ov=>ov.addEventListener('mousedown', e=>{
+    if (e.target !== ov) return;
+    if (ov.id === 'ov-confirm'){ $('#confirm-no').click(); return; }
+    ov.classList.remove('open');
+  }));
+
+  window.addEventListener('resize', ()=>{
+    clearTimeout(window.__rsz);
+    window.__rsz = setTimeout(()=>{
+      if (currentTab==='weight') renderWeight();
+      if (currentTab==='reports') renderReports();
+      if (currentTab==='learning') renderLearning();
+    }, 220);
+  });
+  document.addEventListener('visibilitychange', ()=>{
+    if (document.visibilityState === 'visible'){
+      const rollover = ensureToday();
+      if (rollover){ renderAll(); updateBadges(); }
+      fetchPrayers();
+    }
+  });
+}
+function init(){
+  loadState();
+  ensureToday();
+  applyTheme();
+  bindEvents();
+  /* حقول متوسط الوزن: افتراضيًا آخر 30 يومًا */
+  $('#weight-avg-from').value = addDays(todayStr(), -30);
+  $('#weight-avg-to').value = todayStr();
+  renderAll();
+  updateBadges();
+  switchTab('dashboard');
+  clockTick(true);
+  setInterval(clockTick, 1000);
+  setInterval(engineTick, 20000);
+  fetchPrayers();
+  console.log('[لوحة يومي] جاهز — الحفظ التلقائي في LocalStorage مفعّل');
+}
+init();
+</script>
+</body>
+</html>
